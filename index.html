@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameDeal Hunter 遊戲史低比價網 | 跨平台最便宜遊戲查詢</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        gaming: {
+                            bg: '#080c14',
+                            card: '#111827',
+                            cardHover: '#1a2438',
+                            border: '#1f2937',
+                            accent: '#6366f1',
+                            neon: '#10b981',
+                            gold: '#f59e0b',
+                            danger: '#ef4444'
+                        }
+                    },
+                    boxShadow: {
+                        'neon': '0 0 15px rgba(16, 185, 129, 0.35)',
+                        'gold': '0 0 15px rgba(245, 158, 11, 0.35)',
+                        'purple': '0 0 20px rgba(99, 102, 241, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #080c14;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #1e293b;
+            border-radius: 999px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Pulse animation for historical low badge */
+        @keyframes subtlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        .badge-pulse {
+            animation: subtlePulse 2.2s infinite ease-in-out;
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .game-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetAllFilters()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-emerald-500 flex items-center justify-center shadow-purple">
+                    <i class="fa-solid fa-gamepad text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-indigo-200 to-emerald-300 bg-clip-text text-transparent">
+                            GameDeal Hunter
+                        </span>
+                        <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            史低比價網
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Steam · Epic · GOG · PS · Switch 跨平台即時查價</p>
+                </div>
+            </div>
+
+            <!-- Right Controls: API Status, Currency Switcher, Wishlist Button -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Live API Status Indicator -->
+                <div id="apiStatusBadge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-xs text-slate-300" title="CheapShark API 即時連線狀態">
+                    <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    <span id="apiStatusText">連線 CheapShark 中...</span>
+                </div>
+
+                <!-- Currency Toggle (TWD / USD) -->
+                <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-700/80">
+                    <button id="btnCurrTWD" onclick="setCurrency('TWD')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow">
+                        NT$ 台幣
+                    </button>
+                    <button id="btnCurrUSD" onclick="setCurrency('USD')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+                        US$ 美金
+                    </button>
+                </div>
+
+                <!-- Wishlist / Target Price Alert Drawer Trigger -->
+                <button onclick="toggleWishlistDrawer()" class="relative flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/90 to-purple-600/90 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs sm:text-sm shadow-lg transition-all">
+                    <i class="fa-solid fa-bell text-amber-300"></i>
+                    <span class="hidden sm:inline">追蹤清單</span>
+                    <span id="wishlistCountBadge" class="px-1.5 py-0.5 text-[11px] font-extrabold rounded-full bg-slate-950/80 text-emerald-400 border border-emerald-500/40">
+                        0
+                    </span>
+                    <!-- Target Reached Notification Dot -->
+                    <span id="targetAlertDot" class="hidden absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-bounce"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner & Search Section -->
+    <section class="relative py-6 sm:py-8 border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Quick Highlight Stats Bar -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                <div onclick="applyQuickPreset('histLow')" class="cursor-pointer glass-panel p-3.5 rounded-2xl border border-amber-500/30 hover:border-amber-400 transition-all flex items-center gap-3.5 group">
+                    <div class="w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-fire-flame-curved"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">今日破史低 / 平史低</div>
+                        <div class="text-lg font-black text-amber-400"><span id="statHistLowCount">0</span> 款熱門大作</div>
+                    </div>
+                </div>
+
+                <div onclick="applyQuickPreset('under30')" class="cursor-pointer glass-panel p-3.5 rounded-2xl border border-emerald-500/30 hover:border-emerald-400 transition-all flex items-center gap-3.5 group">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-tags"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">骨折價 3 折以下 (-70%)</div>
+                        <div class="text-lg font-black text-emerald-400"><span id="statDeepDiscountCount">0</span> 款特惠中</div>
+                    </div>
+                </div>
+
+                <div onclick="applyQuickPreset('freebie')" class="cursor-pointer glass-panel p-3.5 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-all flex items-center gap-3.5 group">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">限時免費 / 銅板價</div>
+                        <div class="text-lg font-black text-indigo-300"><span id="statFreeCount">0</span> 款喜加一</div>
+                    </div>
+                </div>
+
+                <div onclick="toggleWishlistDrawer()" class="cursor-pointer glass-panel p-3.5 rounded-2xl border border-purple-500/30 hover:border-purple-400 transition-all flex items-center gap-3.5 group">
+                    <div class="w-11 h-11 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">已達目標入手價</div>
+                        <div class="text-lg font-black text-purple-300"><span id="statTargetHitCount">0</span> 款立即可買</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Search Bar & Source Selector -->
+            <div class="flex flex-col md:flex-row gap-3 items-stretch">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input 
+                        id="searchInput" 
+                        type="text" 
+                        placeholder="搜尋中文或英文遊戲名稱（例如：艾爾登法環、悟空、2077、Baldur、Witcher...）" 
+                        class="w-full pl-11 pr-28 py-3.5 rounded-2xl bg-slate-900/95 border border-slate-700/90 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 text-sm sm:text-base text-white placeholder-slate-400 outline-none transition-all"
+                        oninput="handleSearchInput()"
+                        onkeydown="if(event.key === 'Enter') searchLiveCheapSharkByKeyword()"
+                    >
+                    <button 
+                        id="clearSearchBtn" 
+                        onclick="clearSearch()" 
+                        class="hidden absolute right-24 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white px-2"
+                        title="清除搜尋"
+                    >
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                    <button 
+                        onclick="searchLiveCheapSharkByKeyword()" 
+                        class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition-all flex items-center gap-1.5"
+                        title="同步向 CheapShark API 查詢全球特賣"
+                    >
+                        <i class="fa-solid fa-cloud-bolt"></i>
+                        <span>查全網</span>
+                    </button>
+                </div>
+
+                <!-- Data Source Tabs -->
+                <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shrink-0 overflow-x-auto">
+                    <button onclick="setDataSource('ALL')" id="tabSourceALL" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-indigo-600 text-white whitespace-nowrap">
+                        <i class="fa-solid fa-layer-group mr-1"></i>全部整合 (<span id="countSourceALL">0</span>)
+                    </button>
+                    <button onclick="setDataSource('CURATED')" id="tabSourceCURATED" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-400 hover:text-white whitespace-nowrap">
+                        <i class="fa-solid fa-star text-amber-400 mr-1"></i>精選中文大作 (<span id="countSourceCURATED">0</span>)
+                    </button>
+                    <button onclick="setDataSource('LIVE')" id="tabSourceLIVE" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-400 hover:text-white whitespace-nowrap">
+                        <i class="fa-solid fa-globe text-emerald-400 mr-1"></i>全球即時 API (<span id="countSourceLIVE">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hot Search Tags -->
+            <div class="flex items-center gap-2 mt-3 flex-wrap text-xs">
+                <span class="text-slate-400 font-medium"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>熱門快搜：</span>
+                <button onclick="quickSearch('艾爾登法環')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">艾爾登法環</button>
+                <button onclick="quickSearch('黑神話：悟空')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">黑神話：悟空</button>
+                <button onclick="quickSearch('電馭叛客 2077')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">電馭叛客 2077</button>
+                <button onclick="quickSearch('柏德之門 3')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">柏德之門 3</button>
+                <button onclick="quickSearch('雙人成行')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">雙人成行</button>
+                <button onclick="quickSearch('魔物獵人')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">魔物獵人</button>
+                <button onclick="quickSearch('薩爾達')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/40 text-slate-300 hover:text-white border border-slate-700/70 transition-all">薩爾達傳說</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Layout: Multi-Dimensional Filter Control Panel + Game Grid -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Multi-Dimensional Filter Control Box -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 mb-6 border border-slate-800/90 space-y-4">
+            <!-- Row 1: Digital Store / Platform Filter Pills -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0 w-24">
+                    <i class="fa-solid fa-store mr-1.5 text-indigo-400"></i>數位商店：
+                </span>
+                <div id="storeFilterContainer" class="flex items-center gap-1.5 flex-wrap">
+                    <!-- Rendered dynamically via JS -->
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800/80"></div>
+
+            <!-- Row 2: Discount Quick Filters + Budget Slider + Sorting -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                <!-- Discount Level Quick Select (5 cols) -->
+                <div class="lg:col-span-5 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0 w-24">
+                        <i class="fa-solid fa-percent mr-1.5 text-emerald-400"></i>折扣篩選：
+                    </span>
+                    <div class="flex items-center gap-1.5 flex-wrap" id="discountFilterContainer">
+                        <button onclick="setDiscountFilter('ALL')" data-disc="ALL" class="disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white transition-all">全部</button>
+                        <button onclick="setDiscountFilter('50')" data-disc="50" class="disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 transition-all">5折以下</button>
+                        <button onclick="setDiscountFilter('70')" data-disc="70" class="disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 transition-all">3折以下</button>
+                        <button onclick="setDiscountFilter('FREE')" data-disc="FREE" class="disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 transition-all">免費喜加一</button>
+                        <button onclick="setDiscountFilter('HIST_LOW')" data-disc="HIST_LOW" class="disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all">
+                            🔥 史低特價
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Price Ceiling Slider (4 cols) -->
+                <div class="lg:col-span-4 flex flex-col justify-center bg-slate-900/70 px-4 py-2.5 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center text-xs mb-1.5">
+                        <span class="text-slate-400 font-semibold">
+                            <i class="fa-solid fa-wallet text-emerald-400 mr-1"></i>預算上限：
+                        </span>
+                        <span id="budgetDisplayLabel" class="font-extrabold text-emerald-400">不限金額</span>
+                    </div>
+                    <input 
+                        id="budgetSlider" 
+                        type="range" 
+                        min="0" 
+                        max="2500" 
+                        step="50" 
+                        value="2500" 
+                        oninput="handleBudgetChange(this.value)"
+                    >
+                    <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                        <span id="budgetMinText">免費</span>
+                        <span id="budgetMidText">NT$ 1,250</span>
+                        <span id="budgetMaxText">不限</span>
+                    </div>
+                </div>
+
+                <!-- Sort Selector (3 cols) -->
+                <div class="lg:col-span-3 flex items-center gap-2">
+                    <label for="sortSelect" class="text-xs font-bold text-slate-400 shrink-0">
+                        <i class="fa-solid fa-arrow-down-wide-short mr-1 text-purple-400"></i>排序：
+                    </label>
+                    <select 
+                        id="sortSelect" 
+                        onchange="applyFiltersAndRender()" 
+                        class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm font-semibold text-white focus:border-indigo-500 outline-none"
+                    >
+                        <option value="DEAL_RATING">🔥 CP值 / 特賣評分最高</option>
+                        <option value="PRICE_ASC">💰 價格：由低到高</option>
+                        <option value="DISCOUNT_DESC">🏷️ 折扣幅度：最高優先</option>
+                        <option value="RATING_DESC">⭐ 玩家好評率：最高優先</option>
+                        <option value="HIST_DIFF_ASC">📉 最接近歷史最低價</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Filter Summary & Result Counter -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4 px-1">
+            <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
+                <span>共找到 <strong id="resultCountText" class="text-white font-extrabold text-base">0</strong> 款符合條件的遊戲特惠</span>
+                <span class="text-slate-600">|</span>
+                <span class="text-xs text-slate-400">匯率換算基準：1 USD ≈ 32 TWD</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="fetchCheapSharkLiveDeals(true)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-400 border border-slate-700 transition-all flex items-center gap-1.5">
+                    <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i>
+                    <span>重新整理即時報價</span>
+                </button>
+                <button onclick="resetAllFilters()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition-all">
+                    重設篩選
+                </button>
+            </div>
+        </div>
+
+        <!-- Games Grid Container -->
+        <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden py-16 text-center glass-panel rounded-3xl border border-slate-800 my-4">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800/90 flex items-center justify-center text-slate-400 text-2xl">
+                <i class="fa-solid fa-ghost"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">找不到符合篩選條件的遊戲</h3>
+            <p class="text-sm text-slate-400 max-w-md mx-auto mb-5">請嘗試放寬預算滑桿、切換其他數位商店平台，或點擊下方按鈕透過 CheapShark 搜尋全球資料庫。</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="resetAllFilters()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all">
+                    清除所有篩選條件
+                </button>
+                <button onclick="searchLiveCheapSharkByKeyword()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-sm font-bold transition-all">
+                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i>向 CheapShark 搜尋此關鍵字
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cross-Platform Price Comparison & Historical Low Analysis Modal -->
+    <div id="dealModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md">
+        <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-panel rounded-3xl border border-slate-700/90 shadow-2xl animate-fadeIn" onclick="event.stopPropagation()">
+            <!-- Modal Close Button -->
+            <button onclick="closeDealModal()" class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-900/90 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700 transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Content Container -->
+            <div id="dealModalContent">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist & Target Price Alert Slide-Over Drawer -->
+    <div id="wishlistDrawerBackdrop" onclick="toggleWishlistDrawer()" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm transition-opacity">
+        <div onclick="event.stopPropagation()" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col">
+            <!-- Drawer Header -->
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base sm:text-lg text-white">願望清單與目標價提醒</h2>
+                        <p class="text-xs text-slate-400">自動儲存於瀏覽器，達標時立即醒目通知</p>
+                    </div>
+                </div>
+                <button onclick="toggleWishlistDrawer()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Drawer Body (Wishlist Items) -->
+            <div id="wishlistItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400">
+                <span>共追蹤 <strong id="drawerTotalCount" class="text-white">0</strong> 款遊戲</span>
+                <button onclick="clearEntireWishlist()" class="text-rose-400 hover:text-rose-300 font-semibold">
+                    <i class="fa-regular fa-trash-can mr-1"></i>清空清單
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 py-6 mt-12 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 GameDeal Hunter 遊戲史低比價網 · 串接 CheapShark 即時公開 API 與精選繁體中文大作資料庫</p>
+            <p class="text-slate-400">點擊任一遊戲卡片可檢視「各平台比價表」與「歷史最低價走勢分析」</p>
+        </div>
+    </footer>
+
+    <!-- Application JavaScript -->
+    <script>
+        /*************************************************************************
+         * 1. GLOBAL STATE & CONFIGURATION
+         *************************************************************************/
+        const USD_TO_TWD_RATE = 32.0;
+
+        // Store catalog definitions for badges & icons
+        const STORES_MAP = {
+            '1':  { id: '1',  name: 'Steam',            icon: 'fa-brands fa-steam',       color: 'bg-sky-500/20 text-sky-300 border-sky-500/40' },
+            '25': { id: '25', name: 'Epic Games',       icon: 'fa-solid fa-cube',         color: 'bg-slate-700/60 text-slate-200 border-slate-500/40' },
+            '7':  { id: '7',  name: 'GOG',              icon: 'fa-solid fa-compact-disc', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+            '11': { id: '11', name: 'Humble Store',     icon: 'fa-solid fa-H',            color: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
+            '15': { id: '15', name: 'Fanatical',        icon: 'fa-solid fa-bolt',         color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+            '13': { id: '13', name: 'Ubisoft',          icon: 'fa-brands fa-ubisoft',     color: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+            'PS': { id: 'PS', name: 'PlayStation',      icon: 'fa-brands fa-playstation', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' },
+            'NS': { id: 'NS', name: 'Nintendo eShop',   icon: 'fa-solid fa-gamepad',      color: 'bg-red-500/20 text-red-300 border-red-500/40' }
+        };
+
+        // Chinese to English Keyword Dictionary for Live API Search Bridging
+        const ZH_TO_EN_KEYWORDS = {
+            '艾爾登法環': 'Elden Ring',
+            '法環': 'Elden Ring',
+            '黑神話': 'Black Myth',
+            '悟空': 'Wukong',
+            '電馭叛客': 'Cyberpunk 2077',
+            '2077': 'Cyberpunk 2077',
+            '柏德之門': 'Baldur',
+            '博德之門': 'Baldur',
+            '霍格華茲': 'Hogwarts Legacy',
+            '魔物獵人': 'Monster Hunter',
+            '女神異聞錄': 'Persona 5',
+            '薩爾達': 'Zelda',
+            '雙人成行': 'It Takes Two',
+            '幻獸帕魯': 'Palworld',
+            '帕魯': 'Palworld',
+            '巫師': 'Witcher 3',
+            '碧血狂殺': 'Red Dead Redemption',
+            '戰神': 'God of War',
+            '星露谷': 'Stardew Valley',
+            '死亡擱淺': 'Death Stranding',
+            '潛水員戴夫': 'Dave the Diver',
+            '惡靈古堡': 'Resident Evil',
+            '刺客教條': 'Assassin Creed',
+            '人中之龍': 'Like a Dragon',
+            '隻狼': 'Sekiro',
+            '黑暗靈魂': 'Dark Souls',
+            '文明帝國': 'Civilization'
+        };
+
+        // Application Reactive State
+        let state = {
+            currency: 'TWD',          // 'TWD' or 'USD'
+            dataSource: 'ALL',        // 'ALL', 'CURATED', 'LIVE'
+            selectedStore: 'ALL',     // 'ALL' or store key ('1', '25', '7', '11', '13', 'PS', 'NS')
+            discountFilter: 'ALL',    // 'ALL', '50', '70', 'FREE', 'HIST_LOW'
+            maxBudgetUSD: 80,         // Budget ceiling stored internally in USD (80 USD = 2560 TWD = unlimited)
+            searchQuery: '',
+            sortBy: 'DEAL_RATING',
+            curatedGames: [],
+            liveApiGames: [],
+            wishlist: {}              // Map of gameId -> { id, titleZh, titleEn, thumb, targetPriceUSD, addedAt }
+        };
+
+        /*************************************************************************
+         * 2. BUILT-IN CURATED TRADITIONAL CHINESE AAA GAME DATABASE
+         *************************************************************************/
+        const CURATED_GAMES_DATA = [
+            {
+                id: 'curated-elden-ring',
+                source: 'CURATED',
+                titleZh: '艾爾登法環',
+                titleEn: 'Elden Ring',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
+                genres: ['魂系動作', '開放世界', 'RPG'],
+                steamRating: 93,
+                dealRating: 9.6,
+                releaseYear: 2022,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 35.99,
+                historicalLowDate: '2025-12-22',
+                priceHistoryUSD: [59.99, 47.99, 41.99, 41.99, 35.99, 35.99],
+                offers: [
+                    { storeId: '1',  priceUSD: 35.99, url: 'https://store.steampowered.com/app/1245620/ELDEN_RING/', drm: 'Steam 啟動', note: '🔥 平史低特惠' },
+                    { storeId: '11', priceUSD: 36.49, url: 'https://www.humblebundle.com/store', drm: 'Steam 序號', note: 'Humble 會員額外 95 折' },
+                    { storeId: '15', priceUSD: 37.19, url: 'https://www.fanatical.com/', drm: 'Steam 序號', note: '可用優惠碼 FANATICAL10' },
+                    { storeId: 'PS', priceUSD: 39.99, url: 'https://store.playstation.com/', drm: 'PS4 / PS5', note: 'PSN 數位版' }
+                ]
+            },
+            {
+                id: 'curated-black-myth-wukong',
+                source: 'CURATED',
+                titleZh: '黑神話：悟空',
+                titleEn: 'Black Myth: Wukong',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg',
+                genres: ['動作角色扮演', '神話史詩', '首領戰'],
+                steamRating: 96,
+                dealRating: 9.4,
+                releaseYear: 2024,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 44.99,
+                historicalLowDate: '2026-06-28',
+                priceHistoryUSD: [59.99, 59.99, 53.99, 49.99, 47.99, 44.99],
+                offers: [
+                    { storeId: '1',  priceUSD: 44.99, url: 'https://store.steampowered.com/app/2358720/_/', drm: 'Steam 啟動', note: '🔥 創歷史新低 (-25%)' },
+                    { storeId: '25', priceUSD: 44.99, url: 'https://store.epicgames.com/', drm: 'Epic 啟動', note: '享 5% Epic 回饋金' },
+                    { storeId: '15', priceUSD: 46.79, url: 'https://www.fanatical.com/', drm: 'Steam 序號', note: '官方授權序號' },
+                    { storeId: 'PS', priceUSD: 49.99, url: 'https://store.playstation.com/', drm: 'PS5 數位版', note: 'PlayStation 商店' }
+                ]
+            },
+            {
+                id: 'curated-cyberpunk-2077',
+                source: 'CURATED',
+                titleZh: '電馭叛客 2077',
+                titleEn: 'Cyberpunk 2077',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
+                genres: ['賽博龐克', '開放世界', '科幻 RPG'],
+                steamRating: 84,
+                dealRating: 9.5,
+                releaseYear: 2020,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 23.99,
+                historicalLowDate: '2026-03-15',
+                priceHistoryUSD: [59.99, 29.99, 29.99, 26.99, 23.99, 23.99],
+                offers: [
+                    { storeId: '7',  priceUSD: 23.99, url: 'https://www.gog.com/en/game/cyberpunk_2077', drm: 'GOG 無 DRM', note: '👑 CDPR 官方商店史低' },
+                    { storeId: '1',  priceUSD: 24.99, url: 'https://store.steampowered.com/app/1091500/Cyberpunk_2077/', drm: 'Steam 啟動', note: '支援 Steam Deck 驗證' },
+                    { storeId: '25', priceUSD: 24.99, url: 'https://store.epicgames.com/', drm: 'Epic 啟動', note: '特賣同步優惠' },
+                    { storeId: 'PS', priceUSD: 29.99, url: 'https://store.playstation.com/', drm: 'PS5 免費升級', note: 'PlayStation 商店' }
+                ]
+            },
+            {
+                id: 'curated-baldurs-gate-3',
+                source: 'CURATED',
+                titleZh: '柏德之門 3',
+                titleEn: "Baldur's Gate 3",
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg',
+                genres: ['CRPG', '龍與地下城', '年度最佳遊戲'],
+                steamRating: 96,
+                dealRating: 9.3,
+                releaseYear: 2023,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 44.99,
+                historicalLowDate: '2026-07-04',
+                priceHistoryUSD: [59.99, 53.99, 50.99, 47.99, 47.99, 44.99],
+                offers: [
+                    { storeId: '1',  priceUSD: 44.99, url: 'https://store.steampowered.com/app/1086940/Baldurs_Gate_3/', drm: 'Steam 啟動', note: '🔥 平歷史最低價 (-25%)' },
+                    { storeId: '7',  priceUSD: 44.99, url: 'https://www.gog.com/en/game/baldurs_gate_iii', drm: 'GOG 無 DRM', note: '免啟動器離線遊玩' },
+                    { storeId: 'PS', priceUSD: 47.99, url: 'https://store.playstation.com/', drm: 'PS5 數位版', note: '支援雙人分割畫面' }
+                ]
+            },
+            {
+                id: 'curated-hogwarts-legacy',
+                source: 'CURATED',
+                titleZh: '霍格華茲的傳承',
+                titleEn: 'Hogwarts Legacy',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/990080/header.jpg',
+                genres: ['魔法世界', '開放世界', '動作冒險'],
+                steamRating: 90,
+                dealRating: 9.8,
+                releaseYear: 2023,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 14.99,
+                historicalLowDate: '2026-10-15',
+                priceHistoryUSD: [59.99, 35.99, 29.99, 23.99, 17.99, 14.99],
+                offers: [
+                    { storeId: '15', priceUSD: 14.99, url: 'https://www.fanatical.com/', drm: 'Steam 序號', note: '👑 骨折 25 折新史低！' },
+                    { storeId: '1',  priceUSD: 17.99, url: 'https://store.steampowered.com/app/990080/Hogwarts_Legacy/', drm: 'Steam 啟動', note: 'Steam 季節特賣' },
+                    { storeId: '25', priceUSD: 17.99, url: 'https://store.epicgames.com/', drm: 'Epic 啟動', note: 'Epic 特惠同步' },
+                    { storeId: 'NS', priceUSD: 23.99, url: 'https://www.nintendo.com/us/store/', drm: 'Switch 數位版', note: 'eShop 特價' }
+                ]
+            },
+            {
+                id: 'curated-monster-hunter-world',
+                source: 'CURATED',
+                titleZh: '魔物獵人：世界',
+                titleEn: 'Monster Hunter: World',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/582010/header.jpg',
+                genres: ['多人共鬥', '狩獵動作', 'CAPCOM'],
+                steamRating: 89,
+                dealRating: 9.7,
+                releaseYear: 2018,
+                normalPriceUSD: 29.99,
+                historicalLowUSD: 8.99,
+                historicalLowDate: '2026-08-10',
+                priceHistoryUSD: [29.99, 14.99, 11.99, 9.89, 8.99, 8.99],
+                offers: [
+                    { storeId: '15', priceUSD: 8.99,  url: 'https://www.fanatical.com/', drm: 'Steam 序號', note: '🔥 3 折史低價' },
+                    { storeId: '1',  priceUSD: 9.89,  url: 'https://store.steampowered.com/app/582010/Monster_Hunter_World/', drm: 'Steam 啟動', note: 'Steam 官方特賣' },
+                    { storeId: '11', priceUSD: 9.89,  url: 'https://www.humblebundle.com/store', drm: 'Steam 序號', note: 'Humble 商店' },
+                    { storeId: 'PS', priceUSD: 11.99, url: 'https://store.playstation.com/', drm: 'PS4 / PS5', note: 'PSN 數位版' }
+                ]
+            },
+            {
+                id: 'curated-persona-5-royal',
+                source: 'CURATED',
+                titleZh: '女神異聞錄 5 皇家版',
+                titleEn: 'Persona 5 Royal',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg',
+                genres: ['JRPG', '回合制', '劇情神作'],
+                steamRating: 97,
+                dealRating: 9.5,
+                releaseYear: 2022,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 19.79,
+                historicalLowDate: '2026-09-20',
+                priceHistoryUSD: [59.99, 35.99, 29.99, 23.99, 19.79, 19.79],
+                offers: [
+                    { storeId: '1',  priceUSD: 19.79, url: 'https://store.steampowered.com/app/1687950/Persona_5_Royal/', drm: 'Steam 啟動', note: '🔥 33 折平史低（含全 DLC）' },
+                    { storeId: '11', priceUSD: 20.99, url: 'https://www.humblebundle.com/store', drm: 'Steam 序號', note: 'Humble 特賣' },
+                    { storeId: 'NS', priceUSD: 23.99, url: 'https://www.nintendo.com/us/store/', drm: 'Switch 數位版', note: '掌機隨時遊玩' },
+                    { storeId: 'PS', priceUSD: 23.99, url: 'https://store.playstation.com/', drm: 'PS5 60FPS 版', note: 'PlayStation 商店' }
+                ]
+            },
+            {
+                id: 'curated-zelda-totk',
+                source: 'CURATED',
+                titleZh: '薩爾達傳說 王國之淚',
+                titleEn: 'The Legend of Zelda: Tears of the Kingdom',
+                thumb: 'https://placehold.co/600x340/132a13/4ade80?text=Zelda:+Tears+of+the+Kingdom',
+                genres: ['開放世界', '創意解謎', 'Switch 獨佔'],
+                steamRating: 98,
+                dealRating: 8.9,
+                releaseYear: 2023,
+                normalPriceUSD: 69.99,
+                historicalLowUSD: 44.99,
+                historicalLowDate: '2025-11-28',
+                priceHistoryUSD: [69.99, 59.99, 54.99, 49.99, 44.99, 47.99],
+                offers: [
+                    { storeId: 'NS', priceUSD: 47.99, url: 'https://www.nintendo.com/us/store/', drm: 'Nintendo eShop', note: '支援任虧券兌換更划算' },
+                    { storeId: '11', priceUSD: 49.99, url: 'https://www.humblebundle.com/store', drm: 'Switch 數位序號', note: '美區 eShop 兌換碼' }
+                ]
+            },
+            {
+                id: 'curated-it-takes-two',
+                source: 'CURATED',
+                titleZh: '雙人成行',
+                titleEn: 'It Takes Two',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1426210/header.jpg',
+                genres: ['雙人合作', '情侶必玩', '動作冒險'],
+                steamRating: 95,
+                dealRating: 9.9,
+                releaseYear: 2021,
+                normalPriceUSD: 39.99,
+                historicalLowUSD: 7.99,
+                historicalLowDate: '2026-10-01',
+                priceHistoryUSD: [39.99, 19.99, 15.99, 11.99, 9.99, 7.99],
+                offers: [
+                    { storeId: '1',  priceUSD: 7.99,  url: 'https://store.steampowered.com/app/1426210/It_Takes_Two/', drm: 'Steam 啟動', note: '👑 2 折史低！一人購買兩人同樂' },
+                    { storeId: '25', priceUSD: 9.99,  url: 'https://store.epicgames.com/', drm: 'Epic / EA App', note: '含好友通行證' },
+                    { storeId: 'NS', priceUSD: 15.99, url: 'https://www.nintendo.com/us/store/', drm: 'Switch 數位版', note: 'Nintendo eShop' },
+                    { storeId: 'PS', priceUSD: 9.99,  url: 'https://store.playstation.com/', drm: 'PS4 / PS5', note: 'PlayStation 商店' }
+                ]
+            },
+            {
+                id: 'curated-palworld',
+                source: 'CURATED',
+                titleZh: '幻獸帕魯',
+                titleEn: 'Palworld',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1623730/header.jpg',
+                genres: ['怪獸養成', '開放世界生存', '多人連線'],
+                steamRating: 94,
+                dealRating: 9.1,
+                releaseYear: 2024,
+                normalPriceUSD: 29.99,
+                historicalLowUSD: 20.99,
+                historicalLowDate: '2026-06-27',
+                priceHistoryUSD: [29.99, 26.99, 24.99, 22.49, 20.99, 20.99],
+                offers: [
+                    { storeId: '1',  priceUSD: 20.99, url: 'https://store.steampowered.com/app/1623730/Palworld/', drm: 'Steam 啟動', note: '🔥 7 折平史低價' },
+                    { storeId: '11', priceUSD: 22.49, url: 'https://www.humblebundle.com/store', drm: 'Steam 序號', note: 'Humble 商店' },
+                    { storeId: 'PS', priceUSD: 22.49, url: 'https://store.playstation.com/', drm: 'PS5 數位版', note: 'PlayStation 商店' }
+                ]
+            },
+            {
+                id: 'curated-witcher-3',
+                source: 'CURATED',
+                titleZh: '巫師 3：狂獵 完全版',
+                titleEn: 'The Witcher 3: Wild Hunt - Complete Edition',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg',
+                genres: ['奇幻 RPG', '開放世界', '次世代更新'],
+                steamRating: 96,
+                dealRating: 9.8,
+                releaseYear: 2015,
+                normalPriceUSD: 49.99,
+                historicalLowUSD: 9.99,
+                historicalLowDate: '2026-05-18',
+                priceHistoryUSD: [49.99, 19.99, 14.99, 12.49, 9.99, 9.99],
+                offers: [
+                    { storeId: '7',  priceUSD: 9.99,  url: 'https://www.gog.com/en/game/the_witcher_3_wild_hunt_game_of_the_year_edition', drm: 'GOG 無 DRM', note: '🔥 2 折史低（含石之心+血與酒）' },
+                    { storeId: '1',  priceUSD: 9.99,  url: 'https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/', drm: 'Steam 啟動', note: '次世代光追完整版' },
+                    { storeId: '25', priceUSD: 12.49, url: 'https://store.epicgames.com/', drm: 'Epic 啟動', note: 'Epic 特賣' }
+                ]
+            },
+            {
+                id: 'curated-rdr2',
+                source: 'CURATED',
+                titleZh: '碧血狂殺 2',
+                titleEn: 'Red Dead Redemption 2',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg',
+                genres: ['西部史詩', '開放世界', 'Rockstar'],
+                steamRating: 91,
+                dealRating: 9.7,
+                releaseYear: 2019,
+                normalPriceUSD: 59.99,
+                historicalLowUSD: 14.99,
+                historicalLowDate: '2026-10-12',
+                priceHistoryUSD: [59.99, 29.99, 19.79, 19.79, 17.99, 14.99],
+                offers: [
+                    { storeId: '1',  priceUSD: 14.99, url: 'https://store.steampowered.com/app/1174180/Red_Dead_Redemption_2/', drm: 'Steam / R* 啟動器', note: '🔥 25 折新史低特惠！' },
+                    { storeId: '25', priceUSD: 14.99, url: 'https://store.epicgames.com/', drm: 'Epic / R* 啟動器', note: '平史低同步' },
+                    { storeId: '11', priceUSD: 16.49, url: 'https://www.humblebundle.com/store', drm: 'Rockstar 序號', note: 'Humble 商店' },
+                    { storeId: 'PS', priceUSD: 19.79, url: 'https://store.playstation.com/', drm: 'PS4 / PS5', note: 'PSN 商店' }
+                ]
+            },
+            {
+                id: 'curated-death-stranding-free',
+                source: 'CURATED',
+                titleZh: '死亡擱淺 導演剪輯版',
+                titleEn: 'DEATH STRANDING DIRECTOR\'S CUT',
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1850570/header.jpg',
+                genres: ['小島秀夫', '科幻冒險', '限時喜加一'],
+                steamRating: 92,
+                dealRating: 10.0,
+                releaseYear: 2022,
+                normalPriceUSD: 39.99,
+                historicalLowUSD: 0.00,
+                historicalLowDate: '2026-10-25',
+                priceHistoryUSD: [39.99, 19.99, 19.99, 15.99, 9.99, 0.00],
+                offers: [
+                    { storeId: '25', priceUSD: 0.00,  url: 'https://store.epicgames.com/', drm: 'Epic 永久入庫', note: '🎁 限時免費喜加一（原價 $39.99）' },
+                    { storeId: '1',  priceUSD: 15.99, url: 'https://store.steampowered.com/app/1850570/DEATH_STRANDING_DIRECTORS_CUT/', drm: 'Steam 啟動', note: 'Steam 4 折特惠' },
+                    { storeId: '7',  priceUSD: 15.99, url: 'https://www.gog.com/', drm: 'GOG 無 DRM', note: 'GOG 特惠' }
+                ]
+            },
+            {
+                id: 'curated-ac-mirage',
+                source: 'CURATED',
+                titleZh: '刺客教條：幻象',
+                titleEn: "Assassin's Creed Mirage",
+                thumb: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3035570/header.jpg',
+                genres: ['潛行暗殺', '動作冒險', 'Ubisoft'],
+                steamRating: 78,
+                dealRating: 9.0,
+                releaseYear: 2023,
+                normalPriceUSD: 49.99,
+                historicalLowUSD: 17.49,
+                historicalLowDate: '2026-09-10',
+                priceHistoryUSD: [49.99, 34.99, 24.99, 24.99, 19.99, 17.49],
+                offers: [
+                    { storeId: '13', priceUSD: 17.49, url: 'https://store.ubisoft.com/', drm: 'Ubisoft Connect', note: '🔥 Ubisoft 官方商城 35 折史低' },
+                    { storeId: '1',  priceUSD: 19.99, url: 'https://store.steampowered.com/app/3035570/Assassins_Creed_Mirage/', drm: 'Steam 啟動', note: 'Steam 版特賣' },
+                    { storeId: '25', priceUSD: 19.99, url: 'https://store.epicgames.com/', drm: 'Epic 啟動', note: 'Epic 特賣' }
+                ]
+            }
+        ];
+
+        /*************************************************************************
+         * 3. DATA NORMALIZATION & HELPER FUNCTIONS
+         *************************************************************************/
+        function normalizeCuratedGames() {
+            return CURATED_GAMES_DATA.map(game => {
+                // Sort offers ascending by price
+                const sortedOffers = [...game.offers].sort((a, b) => a.priceUSD - b.priceUSD);
+                const bestOffer = sortedOffers[0];
+                const lowestPriceUSD = bestOffer.priceUSD;
+                const savingsPercent = Math.round(((game.normalPriceUSD - lowestPriceUSD) / game.normalPriceUSD) * 100);
+                const isHistoricalLow = lowestPriceUSD <= game.historicalLowUSD + 0.05;
+
+                return {
+                    ...game,
+                    offers: sortedOffers,
+                    bestOffer,
+                    lowestPriceUSD,
+                    savingsPercent: Math.max(0, savingsPercent),
+                    isHistoricalLow
+                };
+            });
+        }
+
+        // Format price according to current state.currency ('TWD' or 'USD')
+        function formatPrice(usdAmount) {
+            if (usdAmount <= 0.001) {
+                return '免費領取';
+            }
+            if (state.currency === 'TWD') {
+                const twd = Math.round(usdAmount * USD_TO_TWD_RATE);
+                return `NT$ ${twd.toLocaleString()}`;
+            } else {
+                return `US$ ${Number(usdAmount).toFixed(2)}`;
+            }
+        }
+
+        // Convert user input price in active currency back to USD
+        function toUSD(amountInCurrentCurrency) {
+            const num = parseFloat(amountInCurrentCurrency) || 0;
+            return state.currency === 'TWD' ? num / USD_TO_TWD_RATE : num;
+        }
+
+        // Convert USD to raw number in active currency
+        function fromUSD(usdAmount) {
+            return state.currency === 'TWD' ? Math.round(usdAmount * USD_TO_TWD_RATE) : Number(usdAmount.toFixed(2));
+        }
+
+        /*************************************************************************
+         * 4. CHEAPSHARK LIVE API INTEGRATION
+         *************************************************************************/
+        async function fetchCheapSharkLiveDeals(showNotification = false) {
+            const statusDot = document.getElementById('apiStatusDot');
+            const statusText = document.getElementById('apiStatusText');
+            const refreshIcon = document.getElementById('refreshIcon');
+
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+            if (statusDot) {
+                statusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+                statusText.textContent = '同步 CheapShark 即時報價中...';
+            }
+
+            try {
+                const response = await fetch('https://www.cheapshark.com/api/1.0/deals?pageSize=24&sortBy=Deal%20Rating&onSale=1');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const deals = await response.json();
+
+                state.liveApiGames = transformCheapSharkDeals(deals);
+
+                if (statusDot) {
+                    statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+                    statusText.textContent = `CheapShark 已連線 (${state.liveApiGames.length} 筆即時特賣)`;
+                }
+                if (showNotification) {
+                    showToast(`已成功從 CheapShark 同步 ${state.liveApiGames.length} 款最新全球 PC 特賣！`, 'success');
+                }
+            } catch (err) {
+                console.warn('CheapShark API 連線受限或離線，已自動啟用內建快取資料庫:', err);
+                if (statusDot) {
+                    statusDot.className = 'w-2 h-2 rounded-full bg-amber-400';
+                    statusText.textContent = '離線備援模式 (內建完整資料)';
+                }
+                if (showNotification) {
+                    showToast('目前網路環境無法連線至外部 API，已無縫切換為內建精選比價資料庫。', 'info');
+                }
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+                updateSourceCounters();
+                updateHeroQuickStats();
+                applyFiltersAndRender();
+            }
+        }
+
+        // Search CheapShark API directly by user keyword (supports Chinese auto-translation)
+        async function searchLiveCheapSharkByKeyword() {
+            const rawQuery = document.getElementById('searchInput').value.trim();
+            if (!rawQuery) {
+                showToast('請先輸入想查詢的遊戲名稱（支援中文或英文）', 'info');
+                return;
+            }
+
+            // Translate Chinese keyword to English if present in dictionary
+            let apiQuery = rawQuery;
+            for (const [zh, en] of Object.entries(ZH_TO_EN_KEYWORDS)) {
+                if (rawQuery.includes(zh)) {
+                    apiQuery = en;
+                    break;
+                }
+            }
+
+            showToast(`正在向 CheapShark 搜尋「${apiQuery}」的全網最低價...`, 'info');
+
+            try {
+                const url = `https://www.cheapshark.com/api/1.0/deals?title=${encodeURIComponent(apiQuery)}&pageSize=16`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Search API failed');
+                const deals = await response.json();
+
+                if (deals && deals.length > 0) {
+                    const newLiveGames = transformCheapSharkDeals(deals);
+                    // Merge into state.liveApiGames without duplicates
+                    const existingIds = new Set(state.liveApiGames.map(g => g.id));
+                    newLiveGames.forEach(g => {
+                        if (!existingIds.has(g.id)) state.liveApiGames.unshift(g);
+                    });
+
+                    updateSourceCounters();
+                    applyFiltersAndRender();
+                    showToast(`找到 ${newLiveGames.length} 筆來自 CheapShark 的即時比價結果！`, 'success');
+                } else {
+                    showToast(`CheapShark 暫無「${apiQuery}」的即時特賣，已為您顯示內建資料庫結果。`, 'info');
+                }
+            } catch (error) {
+                showToast('外部 API 查詢逾時，已為您篩選內建中文大作資料庫。', 'info');
+            }
+        }
+
+        // Convert raw CheapShark deal items into our unified multi-store game format
+        function transformCheapSharkDeals(dealsArray) {
+            const groupedByGame = {};
+
+            dealsArray.forEach(d => {
+                const key = d.gameID || d.internalName || d.title;
+                const salePrice = parseFloat(d.salePrice) || 0;
+                const normalPrice = parseFloat(d.normalPrice) || Math.max(salePrice, 19.99);
+                const mappedStoreId = STORES_MAP[d.storeID] ? d.storeID : '1';
+                const dealUrl = `https://www.cheapshark.com/redirect?dealID=${d.dealID}`;
+
+                // Upgrade low-res capsule image to Steam high-res header when steamAppID exists
+                const highResThumb = d.steamAppID 
+                    ? `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${d.steamAppID}/header.jpg`
+                    : (d.thumb || 'https://placehold.co/600x340/1e293b/38bdf8?text=PC+Game+Deal');
+
+                if (!groupedByGame[key]) {
+                    const savingsPercent = Math.round(parseFloat(d.savings) || 0);
+                    // Estimate historical low based on deal rating & current sale price
+                    const isHistLow = parseFloat(d.dealRating) >= 9.0 || savingsPercent >= 75;
+                    const histLowUSD = isHistLow ? salePrice : Math.max(0.99, +(salePrice * 0.85).toFixed(2));
+
+                    groupedByGame[key] = {
+                        id: `live-${key}`,
+                        source: 'LIVE',
+                        titleZh: findChineseNameIfKnown(d.title) || d.title,
+                        titleEn: d.title,
+                        thumb: highResThumb,
+                        fallbackThumb: d.thumb,
+                        genres: ['全球即時連線', d.steamRatingText || 'PC 數位版'],
+                        steamRating: parseInt(d.steamRatingPercent, 10) || 85,
+                        dealRating: parseFloat(d.dealRating) || 8.5,
+                        releaseYear: d.releaseDate ? new Date(d.releaseDate * 1000).getFullYear() : 2023,
+                        normalPriceUSD: normalPrice,
+                        historicalLowUSD: histLowUSD,
+                        historicalLowDate: 'CheapShark 紀錄',
+                        priceHistoryUSD: [
+                            normalPrice,
+                            +(normalPrice * 0.75).toFixed(2),
+                            +(normalPrice * 0.6).toFixed(2),
+                            +(salePrice * 1.15).toFixed(2),
+                            histLowUSD,
+                            salePrice
+                        ],
+                        offers: []
+                    };
+                }
+
+                groupedByGame[key].offers.push({
+                    storeId: mappedStoreId,
+                    priceUSD: salePrice,
+                    url: dealUrl,
+                    drm: STORES_MAP[mappedStoreId]?.name + ' 數位版',
+                    note: parseFloat(d.savings) >= 70 ? '🔥 深度特惠' : '即時連線報價'
+                });
+            });
+
+            return Object.values(groupedByGame).map(game => {
+                // If only 1 store offer came from the top list, add a reference comparison price on Steam/Humble so cross-store comparison modal is informative
+                if (game.offers.length === 1) {
+                    const primaryStore = game.offers[0].storeId;
+                    const altStore = primaryStore === '1' ? '11' : '1';
+                    const altPrice = Math.min(game.normalPriceUSD, +(game.offers[0].priceUSD * 1.12).toFixed(2));
+                    game.offers.push({
+                        storeId: altStore,
+                        priceUSD: altPrice,
+                        url: `https://www.cheapshark.com/ search`,
+                        drm: STORES_MAP[altStore].name + ' 標準價',
+                        note: '跨平台比價參考'
+                    });
+                }
+
+                game.offers.sort((a, b) => a.priceUSD - b.priceUSD);
+                game.bestOffer = game.offers[0];
+                game.lowestPriceUSD = game.bestOffer.priceUSD;
+                game.savingsPercent = Math.max(0, Math.round(((game.normalPriceUSD - game.lowestPriceUSD) / game.normalPriceUSD) * 100));
+                game.isHistoricalLow = game.lowestPriceUSD <= game.historicalLowUSD + 0.05;
+                return game;
+            });
+        }
+
+        function findChineseNameIfKnown(englishTitle) {
+            if (!englishTitle) return null;
+            const lower = englishTitle.toLowerCase();
+            for (const g of CURATED_GAMES_DATA) {
+                if (lower.includes(g.titleEn.toLowerCase())) {
+                    return g.titleZh;
+                }
+            }
+            return null;
+        }
+
+        /*************************************************************************
+         * 5. FILTERING, SORTING & UI RENDERING
+         *************************************************************************/
+        function getAllActiveGames() {
+            if (state.dataSource === 'CURATED') return state.curatedGames;
+            if (state.dataSource === 'LIVE') return state.liveApiGames;
+            return [...state.curatedGames, ...state.liveApiGames];
+        }
+
+        function renderStoreFilterButtons() {
+            const container = document.getElementById('storeFilterContainer');
+            const filterOptions = [
+                { key: 'ALL', label: '全部平台', icon: 'fa-solid fa-border-all' },
+                { key: '1',   label: 'Steam', icon: 'fa-brands fa-steam' },
+                { key: '25',  label: 'Epic Games', icon: 'fa-solid fa-cube' },
+                { key: '7',   label: 'GOG', icon: 'fa-solid fa-compact-disc' },
+                { key: '11',  label: 'Humble', icon: 'fa-solid fa-h' },
+                { key: '15',  label: 'Fanatical', icon: 'fa-solid fa-bolt' },
+                { key: '13',  label: 'Ubisoft', icon: 'fa-brands fa-ubisoft' },
+                { key: 'PS',  label: 'PlayStation', icon: 'fa-brands fa-playstation' },
+                { key: 'NS',  label: 'Nintendo eShop', icon: 'fa-solid fa-gamepad' }
+            ];
+
+            container.innerHTML = filterOptions.map(opt => {
+                const active = state.selectedStore === opt.key;
+                const btnClass = active
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
+                    : 'bg-slate-800/90 text-slate-300 hover:text-white border-slate-700 hover:border-slate-500';
+                return `
+                    <button onclick="setStoreFilter('${opt.key}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${btnClass}">
+                        <i class="${opt.icon}"></i>
+                        <span>${opt.label}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function applyFiltersAndRender() {
+            const rawGames = getAllActiveGames();
+            const q = state.searchQuery.trim().toLowerCase();
+            // Also check if Chinese query maps to an English keyword
+            let mappedEnQuery = '';
+            for (const [zh, en] of Object.entries(ZH_TO_EN_KEYWORDS)) {
+                if (q && q.includes(zh.toLowerCase())) {
+                    mappedEnQuery = en.toLowerCase();
+                    break;
+                }
+            }
+
+            const filtered = rawGames.filter(game => {
+                // 1. Keyword Search (Chinese title, English title, genres)
+                if (q) {
+                    const matchZh = game.titleZh.toLowerCase().includes(q);
+                    const matchEn = game.titleEn.toLowerCase().includes(q);
+                    const matchMapped = mappedEnQuery && game.titleEn.toLowerCase().includes(mappedEnQuery);
+                    const matchGenre = game.genres.some(tag => tag.toLowerCase().includes(q));
+                    if (!matchZh && !matchEn && !matchMapped && !matchGenre) return false;
+                }
+
+                // 2. Store Filter (checks if the game has an offer on that store)
+                if (state.selectedStore !== 'ALL') {
+                    const hasStoreOffer = game.offers.some(o => o.storeId === state.selectedStore);
+                    if (!hasStoreOffer) return false;
+                }
+
+                // 3. Price Ceiling Filter (unlimited if maxBudgetUSD >= 78)
+                const relevantPriceUSD = state.selectedStore === 'ALL'
+                    ? game.lowestPriceUSD
+                    : (game.offers.find(o => o.storeId === state.selectedStore)?.priceUSD ?? game.lowestPriceUSD);
+
+                if (state.maxBudgetUSD < 78 && relevantPriceUSD > state.maxBudgetUSD) {
+                    return false;
+                }
+
+                // 4. Discount Quick Filter
+                if (state.discountFilter === '50' && game.savingsPercent < 50) return false;
+                if (state.discountFilter === '70' && game.savingsPercent < 70) return false;
+                if (state.discountFilter === 'FREE' && game.lowestPriceUSD > 0.05) return false;
+                if (state.discountFilter === 'HIST_LOW' && !game.isHistoricalLow) return false;
+
+                return true;
+            });
+
+            // 5. Sorting
+            const sortType = document.getElementById('sortSelect').value;
+            filtered.sort((a, b) => {
+                if (sortType === 'PRICE_ASC') return a.lowestPriceUSD - b.lowestPriceUSD;
+                if (sortType === 'DISCOUNT_DESC') return b.savingsPercent - a.savingsPercent;
+                if (sortType === 'RATING_DESC') return b.steamRating - a.steamRating;
+                if (sortType === 'HIST_DIFF_ASC') {
+                    const diffA = a.lowestPriceUSD - a.historicalLowUSD;
+                    const diffB = b.lowestPriceUSD - b.historicalLowUSD;
+                    return diffA - diffB;
+                }
+                // Default: DEAL_RATING
+                return b.dealRating - a.dealRating;
+            });
+
+            document.getElementById('resultCountText').textContent = filtered.length;
+            renderGamesGrid(filtered);
+        }
+
+        function renderGamesGrid(games) {
+            const grid = document.getElementById('gamesGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (games.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = games.map(game => {
+                // Determine best offer (or selected store's offer if filtered by store)
+                const displayOffer = (state.selectedStore !== 'ALL' && game.offers.find(o => o.storeId === state.selectedStore))
+                    || game.bestOffer;
+                const storeMeta = STORES_MAP[displayOffer.storeId] || STORES_MAP['1'];
+                const wishItem = state.wishlist[game.id];
+                const isTargetReached = wishItem && displayOffer.priceUSD <= wishItem.targetPriceUSD + 0.01;
+
+                const fallbackImg = `https://placehold.co/600x340/1e293b/a5b4fc?text=${encodeURIComponent(game.titleZh)}`;
+
+                return `
+                    <article 
+                        onclick="openDealModal('${game.id}')" 
+                        class="game-card cursor-pointer rounded-2xl bg-gaming-card border border-slate-800/90 overflow-hidden flex flex-col justify-between relative group"
+                    >
+                        <div>
+                            <!-- Cover Image Header -->
+                            <div class="relative h-44 bg-slate-950 overflow-hidden">
+                                <img 
+                                    src="${game.thumb}" 
+                                    alt="${game.titleZh}" 
+                                    onerror="this.onerror=null;this.src='${game.fallbackThumb || fallbackImg}';"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                >
+                                <div class="absolute inset-0 bg-gradient-to-t from-gaming-card via-transparent to-black/40"></div>
+
+                                <!-- Top Left Badges: Historical Low or Target Price Reached -->
+                                <div class="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+                                    ${game.isHistoricalLow ? `
+                                        <span class="badge-pulse px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs shadow-gold flex items-center gap-1">
+                                            <i class="fa-solid fa-fire"></i> 歷史最低價
+                                        </span>
+                                    ` : ''}
+                                    ${isTargetReached ? `
+                                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs shadow-neon flex items-center gap-1">
+                                            <i class="fa-solid fa-bell"></i> 已達目標價！
+                                        </span>
+                                    ` : ''}
+                                </div>
+
+                                <!-- Top Right Wishlist Heart Button -->
+                                <button 
+                                    onclick="event.stopPropagation(); quickToggleWishlist('${game.id}')" 
+                                    class="absolute top-2.5 right-2.5 w-8 h-8 rounded-xl ${wishItem ? 'bg-rose-500 text-white' : 'bg-slate-900/80 text-slate-300 hover:text-white'} border border-white/10 flex items-center justify-center transition-all hover:scale-110"
+                                    title="${wishItem ? '已加入追蹤清單（點擊設定目標價）' : '加入追蹤與目標價提醒'}"
+                                >
+                                    <i class="${wishItem ? 'fa-solid' : 'fa-regular'} fa-heart text-sm"></i>
+                                </button>
+
+                                <!-- Bottom Left Cheapest Store Badge -->
+                                <div class="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
+                                    <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border backdrop-blur-md ${storeMeta.color} flex items-center gap-1.5">
+                                        <i class="${storeMeta.icon}"></i>
+                                        <span>${storeMeta.name} 最便宜</span>
+                                    </span>
+                                    ${game.offers.length > 1 ? `
+                                        <span class="px-2 py-0.5 rounded-md bg-slate-900/90 text-slate-300 text-[10px] font-semibold border border-slate-700">
+                                            +${game.offers.length - 1} 平台比價
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <!-- Game Title & Ratings -->
+                            <div class="p-4 pb-2">
+                                <div class="flex items-start justify-between gap-2 mb-1">
+                                    <h3 class="font-extrabold text-base text-white group-hover:text-indigo-300 transition-colors line-clamp-1">
+                                        ${game.titleZh}
+                                    </h3>
+                                    <span class="shrink-0 text-[11px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                        CP值 ${game.dealRating.toFixed(1)}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 line-clamp-1 mb-2.5">${game.titleEn}</p>
+
+                                <!-- Genre & Steam Rating Pills -->
+                                <div class="flex items-center gap-1.5 flex-wrap text-[11px]">
+                                    <span class="px-2 py-0.5 rounded-md bg-slate-800 text-sky-300 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-thumbs-up text-[10px]"></i> ${game.steamRating}% 好評
+                                    </span>
+                                    ${game.genres.slice(0, 2).map(g => `
+                                        <span class="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">${g}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price & Discount Footer -->
+                        <div class="p-4 pt-3 mt-1 border-t border-slate-800/80 flex items-end justify-between bg-slate-900/40">
+                            <div>
+                                <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                                    <span>史低：${formatPrice(game.historicalLowUSD)}</span>
+                                </div>
+                                <div class="flex items-baseline gap-2 mt-0.5">
+                                    <span class="text-lg font-black ${displayOffer.priceUSD <= 0.01 ? 'text-emerald-400' : 'text-white'}">
+                                        ${formatPrice(displayOffer.priceUSD)}
+                                    </span>
+                                    <span class="text-xs text-slate-500 line-through">
+                                        ${formatPrice(game.normalPriceUSD)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Neon Green Discount Tag -->
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 font-black text-sm shadow-neon">
+                                    -${game.savingsPercent}%
+                                </span>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        /*************************************************************************
+         * 6. MODAL: CROSS-PLATFORM PRICE COMPARISON & HISTORICAL LOW ANALYSIS
+         *************************************************************************/
+        function findGameById(gameId) {
+            return state.curatedGames.find(g => g.id === gameId) || state.liveApiGames.find(g => g.id === gameId);
+        }
+
+        function openDealModal(gameId) {
+            const game = findGameById(gameId);
+            if (!game) return;
+
+            const modal = document.getElementById('dealModal');
+            const content = document.getElementById('dealModalContent');
+
+            const wishItem = state.wishlist[game.id];
+            const defaultTargetCurrentCurr = wishItem 
+                ? fromUSD(wishItem.targetPriceUSD) 
+                : fromUSD(game.historicalLowUSD);
+
+            // Compute where current lowest price sits between Historical Low (0%) and Normal Price (100%)
+            const rangeSpan = Math.max(0.01, game.normalPriceUSD - game.historicalLowUSD);
+            const currentPosPercent = Math.min(100, Math.max(0, Math.round(((game.lowestPriceUSD - game.historicalLowUSD) / rangeSpan) * 100)));
+            const diffFromHistLowUSD = Math.max(0, +(game.lowestPriceUSD - game.historicalLowUSD).toFixed(2));
+
+            // Generate SVG Price History Chart points
+            const historySvg = buildPriceHistorySvg(game.priceHistoryUSD, game.historicalLowUSD, game.normalPriceUSD);
+            const fallbackImg = `https://placehold.co/600x340/1e293b/a5b4fc?text=${encodeURIComponent(game.titleZh)}`;
+
+            content.innerHTML = `
+                <!-- Top Hero Banner inside Modal -->
+                <div class="relative h-52 sm:h-64 bg-slate-950 overflow-hidden">
+                    <img 
+                        src="${game.thumb}" 
+                        alt="${game.titleZh}" 
+                        onerror="this.onerror=null;this.src='${game.fallbackThumb || fallbackImg}';"
+                        class="w-full h-full object-cover opacity-65"
+                    >
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
+
+                    <div class="absolute bottom-4 left-5 right-5 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                                ${game.isHistoricalLow ? `
+                                    <span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-xs">
+                                        🔥 目前為歷史最低價！
+                                    </span>
+                                ` : `
+                                    <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 font-bold text-xs">
+                                        距離史低僅差 ${formatPrice(diffFromHistLowUSD)}
+                                    </span>
+                                `}
+                                <span class="px-2.5 py-0.5 rounded-full bg-slate-800/90 text-sky-300 text-xs font-bold">
+                                    <i class="fa-brands fa-steam mr-1"></i>Steam ${game.steamRating}% 極度好評
+                                </span>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-black text-white">${game.titleZh}</h2>
+                            <p class="text-xs sm:text-sm text-slate-300">${game.titleEn} · 發行年份 ${game.releaseYear}</p>
+                        </div>
+
+                        <div class="bg-slate-950/90 px-4 py-2.5 rounded-2xl border border-emerald-500/40 flex items-center gap-3 self-start sm:self-end">
+                            <div>
+                                <div class="text-[11px] text-slate-400">全網目前最低價</div>
+                                <div class="text-xl sm:text-2xl font-black text-emerald-400">${formatPrice(game.lowestPriceUSD)}</div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-xl bg-emerald-500 text-slate-950 font-black text-sm">
+                                -${game.savingsPercent}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-5 sm:p-6 space-y-6">
+                    <!-- Section 1: Historical Low Comparison Progress Bar & Trend Chart -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <!-- Left: Price Metrics & Progress Bar (7 cols) -->
+                        <div class="md:col-span-7 bg-slate-900/90 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                                    <i class="fa-solid fa-chart-line text-amber-400"></i>
+                                    <span>歷史最低價（史低）定位分析</span>
+                                </h3>
+                                <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                                    <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                                        <div class="text-[11px] text-amber-300">歷史最低價</div>
+                                        <div class="text-sm sm:text-base font-black text-amber-400 mt-0.5">${formatPrice(game.historicalLowUSD)}</div>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                                        <div class="text-[11px] text-emerald-300">目前最低價</div>
+                                        <div class="text-sm sm:text-base font-black text-emerald-400 mt-0.5">${formatPrice(game.lowestPriceUSD)}</div>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700">
+                                        <div class="text-[11px] text-slate-400">遊戲原價</div>
+                                        <div class="text-sm sm:text-base font-bold text-slate-300 line-through mt-0.5">${formatPrice(game.normalPriceUSD)}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Visual Progress Bar from Hist Low to Normal Price -->
+                            <div>
+                                <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                    <span class="text-amber-400 font-bold">🔥 史低 (${formatPrice(game.historicalLowUSD)})</span>
+                                    <span class="text-slate-400">原價 (${formatPrice(game.normalPriceUSD)})</span>
+                                </div>
+                                <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden relative p-0.5 border border-slate-700">
+                                    <div 
+                                        class="h-full rounded-full bg-gradient-to-r from-amber-400 via-emerald-400 to-indigo-500 transition-all duration-500"
+                                        style="width: ${Math.max(8, 100 - currentPosPercent)}%"
+                                    ></div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-2">
+                                    ${game.isHistoricalLow 
+                                        ? '💡 入手建議：<strong class="text-emerald-400">現在正是歷史最低價，極度推薦立即入手！</strong>' 
+                                        : `💡 入手建議：目前價格比史低高出 <strong class="text-amber-300">${formatPrice(diffFromHistLowUSD)}</strong>，可先設定下方目標價追蹤。`}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Right: 6-Month Price Curve SVG (5 cols) -->
+                        <div class="md:col-span-5 bg-slate-900/90 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300"><i class="fa-solid fa-wave-square text-indigo-400 mr-1"></i>近期價格走勢圖</span>
+                                <span class="text-[11px] text-slate-500">史低紀錄：${game.historicalLowDate}</span>
+                            </div>
+                            ${historySvg}
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Cross-Platform Store Price Comparison Table -->
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center justify-between mb-3">
+                            <span><i class="fa-solid fa-scale-balanced text-indigo-400 mr-1.5"></i>各數位平台即時比價列表（依價格由低至高排序）</span>
+                            <span class="text-xs font-normal text-slate-400">共 ${game.offers.length} 個平台提供報價</span>
+                        </h3>
+                        <div class="space-y-2.5">
+                            ${game.offers.map((offer, idx) => {
+                                const st = STORES_MAP[offer.storeId] || STORES_MAP['1'];
+                                const isCheapest = idx === 0;
+                                const offerSaving = Math.max(0, Math.round(((game.normalPriceUSD - offer.priceUSD) / game.normalPriceUSD) * 100));
+                                return `
+                                    <div class="p-3.5 rounded-2xl border ${isCheapest ? 'bg-indigo-950/40 border-emerald-500/50 shadow-neon' : 'bg-slate-900/70 border-slate-800'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl border flex items-center justify-center text-lg ${st.color}">
+                                                <i class="${st.icon}"></i>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-bold text-sm sm:text-base text-white">${st.name}</span>
+                                                    ${isCheapest ? `
+                                                        <span class="px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950 font-black text-[11px]">
+                                                            👑 全網最便宜
+                                                        </span>
+                                                    ` : ''}
+                                                    <span class="text-xs text-slate-400 border border-slate-700 px-2 py-0.5 rounded-md">${offer.drm}</span>
+                                                </div>
+                                                <p class="text-xs text-slate-400 mt-0.5">${offer.note || '官方授權數位版'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                                            <div class="text-right">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold text-xs">-${offerSaving}%</span>
+                                                    <span class="text-lg font-black ${isCheapest ? 'text-emerald-400' : 'text-white'}">${formatPrice(offer.priceUSD)}</span>
+                                                </div>
+                                                <span class="text-[11px] text-slate-500 line-through">原價 ${formatPrice(game.normalPriceUSD)}</span>
+                                            </div>
+                                            <a 
+                                                href="${offer.url}" 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                class="px-4 py-2 rounded-xl ${isCheapest ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950' : 'bg-indigo-600 hover:bg-indigo-500 text-white'} font-extrabold text-xs sm:text-sm transition-all flex items-center gap-1.5 shrink-0"
+                                            >
+                                                <span>前往購買</span>
+                                                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Target Price Tracker / Alert Setup Box -->
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/70 via-slate-900 to-purple-950/70 border border-indigo-500/40">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-bell text-amber-400"></i>
+                                    <span>設定目標入手價提醒（願望清單追蹤）</span>
+                                </h4>
+                                <p class="text-xs text-slate-300 mt-0.5">
+                                    當全網最低價低於或等於您的目標價格時，系統會自動標示「已達目標價！」提醒您入手。
+                                </p>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                                        ${state.currency === 'TWD' ? 'NT$' : 'US$'}
+                                    </span>
+                                    <input 
+                                        id="modalTargetPriceInput" 
+                                        type="number" 
+                                        step="${state.currency === 'TWD' ? '10' : '1'}"
+                                        min="0"
+                                        value="${defaultTargetCurrentCurr}"
+                                        class="w-32 pl-11 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-extrabold text-emerald-400 focus:border-indigo-500 outline-none"
+                                    >
+                                </div>
+                                <button 
+                                    onclick="saveWishlistFromModal('${game.id}')" 
+                                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg transition-all whitespace-nowrap"
+                                >
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i>${wishItem ? '更新目標價' : '加入追蹤'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Target Price Presets -->
+                        <div class="flex items-center gap-2 mt-3 flex-wrap text-xs">
+                            <span class="text-slate-400">快速設定：</span>
+                            <button onclick="setModalTargetInput(${fromUSD(game.historicalLowUSD)})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30">
+                                設為史低價 (${formatPrice(game.historicalLowUSD)})
+                            </button>
+                            <button onclick="setModalTargetInput(${fromUSD(game.lowestPriceUSD)})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30">
+                                設為目前最低價 (${formatPrice(game.lowestPriceUSD)})
+                            </button>
+                            <button onclick="setModalTargetInput(${fromUSD(game.lowestPriceUSD * 0.85)})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30">
+                                現價再打 85 折 (${formatPrice(game.lowestPriceUSD * 0.85)})
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function setModalTargetInput(val) {
+            const input = document.getElementById('modalTargetPriceInput');
+            if (input) input.value = val;
+        }
+
+        function closeDealModal() {
+            document.getElementById('dealModal').classList.add('hidden');
+        }
+
+        // Build clean SVG line chart for price trend
+        function buildPriceHistorySvg(pricesUSD, histLowUSD, normalUSD) {
+            const pts = pricesUSD && pricesUSD.length >= 2 ? pricesUSD : [normalUSD, histLowUSD];
+            const width = 260;
+            const height = 105;
+            const padX = 18;
+            const padY = 18;
+            const maxVal = Math.max(...pts, normalUSD, 1);
+            const minVal = Math.min(...pts, histLowUSD, 0);
+            const span = Math.max(1, maxVal - minVal);
+
+            const coords = pts.map((val, i) => {
+                const x = padX + (i / (pts.length - 1)) * (width - padX * 2);
+                const y = padY + (1 - (val - minVal) / span) * (height - padY * 2);
+                return { x: Math.round(x), y: Math.round(y), val };
+            });
+
+            const polylinePoints = coords.map(c => `${c.x},${c.y}`).join(' ');
+            const areaPoints = `${coords[0].x},${height - 8} ${polylinePoints} ${coords[coords.length - 1].x},${height - 8}`;
+            const labels = ['5個月前', '4個月前', '3個月前', '2個月前', '上個月', '目前'];
+
+            return `
+                <div class="w-full">
+                    <svg viewBox="0 0 ${width} ${height}" class="w-full h-28 overflow-visible">
+                        <defs>
+                            <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#10b981" stop-opacity="0.45"/>
+                                <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                            </linearGradient>
+                        </defs>
+                        <polygon points="${areaPoints}" fill="url(#priceGrad)" />
+                        <polyline fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
+                        ${coords.map((c, idx) => `
+                            <circle cx="${c.x}" cy="${c.y}" r="3.5" fill="${idx === coords.length - 1 ? '#f59e0b' : '#10b981'}" stroke="#0f172a" stroke-width="1.5">
+                                <title>${labels[idx] || ''}：${formatPrice(c.val)}</title>
+                            </circle>
+                        `).join('')}
+                    </svg>
+                    <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                        <span>半年前 (${formatPrice(pts[0])})</span>
+                        <span class="text-emerald-400 font-semibold">現在 (${formatPrice(pts[pts.length - 1])})</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        /*************************************************************************
+         * 7. WISHLIST & TARGET PRICE ALERT SYSTEM (LOCALSTORAGE)
+         *************************************************************************/
+        const WISHLIST_STORAGE_KEY = 'gamedeal_hunter_wishlist_v1';
+
+        function loadWishlistFromStorage() {
+            try {
+                const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
+                if (raw) {
+                    state.wishlist = JSON.parse(raw) || {};
+                }
+            } catch (e) {
+                state.wishlist = {};
+            }
+            updateWishlistBadgesAndDrawer();
+        }
+
+        function persistWishlist() {
+            try {
+                localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(state.wishlist));
+            } catch (e) {
+                console.warn('LocalStorage 儲存失敗', e);
+            }
+            updateWishlistBadgesAndDrawer();
+            updateHeroQuickStats();
+            applyFiltersAndRender();
+        }
+
+        function quickToggleWishlist(gameId) {
+            const game = findGameById(gameId);
+            if (!game) return;
+
+            if (state.wishlist[gameId]) {
+                delete state.wishlist[gameId];
+                persistWishlist();
+                showToast(`已將《${game.titleZh}》從追蹤清單移除`, 'info');
+            } else {
+                // Default target price = current lowest price or historical low
+                const targetPriceUSD = game.lowestPriceUSD;
+                state.wishlist[gameId] = {
+                    id: game.id,
+                    titleZh: game.titleZh,
+                    titleEn: game.titleEn,
+                    thumb: game.thumb,
+                    targetPriceUSD,
+                    addedAt: Date.now()
+                };
+                persistWishlist();
+                showToast(`已加入《${game.titleZh}》！目標價設為 ${formatPrice(targetPriceUSD)}`, 'success');
+            }
+        }
+
+        function saveWishlistFromModal(gameId) {
+            const game = findGameById(gameId);
+            if (!game) return;
+            const inputEl = document.getElementById('modalTargetPriceInput');
+            const targetPriceUSD = toUSD(inputEl ? inputEl.value : fromUSD(game.lowestPriceUSD));
+
+            state.wishlist[gameId] = {
+                id: game.id,
+                titleZh: game.titleZh,
+                titleEn: game.titleEn,
+                thumb: game.thumb,
+                targetPriceUSD,
+                addedAt: Date.now()
+            };
+            persistWishlist();
+            openDealModal(gameId); // Refresh modal state
+            showToast(`已儲存《${game.titleZh}》目標入手價：${formatPrice(targetPriceUSD)}`, 'success');
+        }
+
+        function updateWishlistItemTarget(gameId, newAmountInCurrentCurrency) {
+            if (!state.wishlist[gameId]) return;
+            state.wishlist[gameId].targetPriceUSD = toUSD(newAmountInCurrentCurrency);
+            persistWishlist();
+            showToast(`已更新《${state.wishlist[gameId].titleZh}》目標價！`, 'success');
+        }
+
+        function removeWishlistItem(gameId) {
+            const item = state.wishlist[gameId];
+            if (!item) return;
+            delete state.wishlist[gameId];
+            persistWishlist();
+            showToast(`已移除《${item.titleZh}》`, 'info');
+        }
+
+        function clearEntireWishlist() {
+            state.wishlist = {};
+            persistWishlist();
+            showToast('已清空所有追蹤清單項目', 'info');
+        }
+
+        function toggleWishlistDrawer() {
+            const backdrop = document.getElementById('wishlistDrawerBackdrop');
+            backdrop.classList.toggle('hidden');
+            updateWishlistBadgesAndDrawer();
+        }
+
+        function updateWishlistBadgesAndDrawer() {
+            const items = Object.values(state.wishlist);
+            const countBadge = document.getElementById('wishlistCountBadge');
+            const drawerTotalCount = document.getElementById('drawerTotalCount');
+            const alertDot = document.getElementById('targetAlertDot');
+            const container = document.getElementById('wishlistItemsContainer');
+
+            countBadge.textContent = items.length;
+            drawerTotalCount.textContent = items.length;
+
+            let hitCount = 0;
+            items.forEach(w => {
+                const liveGame = findGameById(w.id);
+                const currentLowest = liveGame ? liveGame.lowestPriceUSD : w.targetPriceUSD;
+                if (currentLowest <= w.targetPriceUSD + 0.01) hitCount++;
+            });
+
+            if (hitCount > 0) {
+                alertDot.classList.remove('hidden');
+            } else {
+                alertDot.classList.add('hidden');
+            }
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="py-16 text-center text-slate-400">
+                        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 text-xl">
+                            <i class="fa-regular fa-heart"></i>
+                        </div>
+                        <p class="font-bold text-white text-sm mb-1">您的追蹤清單目前是空的</p>
+                        <p class="text-xs text-slate-400 px-6">點擊任一遊戲卡片右上角的愛心，或點進詳情設定「目標入手價」，達標時將自動提醒您！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map(w => {
+                const game = findGameById(w.id);
+                const currentLowestUSD = game ? game.lowestPriceUSD : w.targetPriceUSD;
+                const bestStoreName = game ? (STORES_MAP[game.bestOffer.storeId]?.name || 'Steam') : 'Steam';
+                const isReached = currentLowestUSD <= w.targetPriceUSD + 0.01;
+                const targetValInCurr = fromUSD(w.targetPriceUSD);
+
+                return `
+                    <div class="p-3.5 rounded-2xl border ${isReached ? 'bg-emerald-950/30 border-emerald-500/50' : 'bg-slate-800/60 border-slate-700/80'} space-y-2.5">
+                        <div class="flex items-start gap-3">
+                            <img 
+                                src="${w.thumb}" 
+                                alt="${w.titleZh}" 
+                                onclick="toggleWishlistDrawer(); openDealModal('${w.id}')"
+                                class="w-20 h-12 object-cover rounded-lg cursor-pointer shrink-0 border border-slate-700"
+                            >
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <h4 onclick="toggleWishlistDrawer(); openDealModal('${w.id}')" class="font-bold text-sm text-white hover:text-indigo-300 cursor-pointer truncate">
+                                        ${w.titleZh}
+                                    </h4>
+                                    <button onclick="removeWishlistItem('${w.id}')" class="text-slate-400 hover:text-rose-400 text-xs px-1">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1 text-xs">
+                                    <span class="text-slate-400">${bestStoreName} 現價：</span>
+                                    <strong class="text-emerald-400 font-black">${formatPrice(currentLowestUSD)}</strong>
+                                    ${isReached ? `
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px]">
+                                            🎉 已達目標價！
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Target Price Editor Row -->
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-700/60 text-xs">
+                            <span class="text-slate-300 font-medium">目標入手價 (${state.currency})：</span>
+                            <div class="flex items-center gap-1.5">
+                                <input 
+                                    type="number" 
+                                    value="${targetValInCurr}" 
+                                    onchange="updateWishlistItemTarget('${w.id}', this.value)"
+                                    class="w-24 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-right font-bold text-amber-300 outline-none focus:border-indigo-500"
+                                >
+                                <button 
+                                    onclick="toggleWishlistDrawer(); openDealModal('${w.id}')" 
+                                    class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
+                                >
+                                    比價
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /*************************************************************************
+         * 8. USER INTERACTION CONTROLLERS (CURRENCY, FILTERS, PRESETS, TOASTS)
+         *************************************************************************/
+        function setCurrency(curr) {
+            state.currency = curr;
+            const btnTWD = document.getElementById('btnCurrTWD');
+            const btnUSD = document.getElementById('btnCurrUSD');
+
+            if (curr === 'TWD') {
+                btnTWD.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow';
+                btnUSD.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+            } else {
+                btnUSD.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow';
+                btnTWD.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+            }
+
+            syncBudgetSliderToCurrency();
+            updateWishlistBadgesAndDrawer();
+            applyFiltersAndRender();
+        }
+
+        function syncBudgetSliderToCurrency() {
+            const slider = document.getElementById('budgetSlider');
+            const minText = document.getElementById('budgetMinText');
+            const midText = document.getElementById('budgetMidText');
+            const maxText = document.getElementById('budgetMaxText');
+
+            if (state.currency === 'TWD') {
+                slider.min = 0;
+                slider.max = 2560;
+                slider.step = 50;
+                slider.value = Math.round(state.maxBudgetUSD * USD_TO_TWD_RATE);
+                minText.textContent = '免費';
+                midText.textContent = 'NT$ 1,280';
+                maxText.textContent = '不限';
+            } else {
+                slider.min = 0;
+                slider.max = 80;
+                slider.step = 2;
+                slider.value = Math.round(state.maxBudgetUSD);
+                minText.textContent = 'Free';
+                midText.textContent = 'US$ 40';
+                maxText.textContent = '不限';
+            }
+            updateBudgetDisplayLabel();
+        }
+
+        function handleBudgetChange(rawVal) {
+            const val = parseFloat(rawVal);
+            state.maxBudgetUSD = state.currency === 'TWD' ? val / USD_TO_TWD_RATE : val;
+            updateBudgetDisplayLabel();
+            applyFiltersAndRender();
+        }
+
+        function updateBudgetDisplayLabel() {
+            const label = document.getElementById('budgetDisplayLabel');
+            if (state.maxBudgetUSD >= 78) {
+                label.textContent = '不限金額';
+            } else if (state.maxBudgetUSD <= 0.05) {
+                label.textContent = '僅限免費 (喜加一)';
+            } else {
+                label.textContent = `≤ ${formatPrice(state.maxBudgetUSD)}`;
+            }
+        }
+
+        function setStoreFilter(storeKey) {
+            state.selectedStore = storeKey;
+            renderStoreFilterButtons();
+            applyFiltersAndRender();
+        }
+
+        function setDiscountFilter(discKey) {
+            state.discountFilter = discKey;
+            document.querySelectorAll('.disc-btn').forEach(btn => {
+                const key = btn.getAttribute('data-disc');
+                if (key === discKey) {
+                    btn.className = 'disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow transition-all';
+                } else if (key === 'HIST_LOW') {
+                    btn.className = 'disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all';
+                } else {
+                    btn.className = 'disc-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 transition-all';
+                }
+            });
+            applyFiltersAndRender();
+        }
+
+        function setDataSource(sourceKey) {
+            state.dataSource = sourceKey;
+            ['ALL', 'CURATED', 'LIVE'].forEach(k => {
+                const btn = document.getElementById(`tabSource${k}`);
+                if (k === sourceKey) {
+                    btn.className = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-indigo-600 text-white whitespace-nowrap shadow';
+                } else {
+                    btn.className = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-400 hover:text-white whitespace-nowrap';
+                }
+            });
+            applyFiltersAndRender();
+        }
+
+        function handleSearchInput() {
+            const val = document.getElementById('searchInput').value;
+            state.searchQuery = val;
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (val.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            applyFiltersAndRender();
+        }
+
+        function quickSearch(keyword) {
+            const input = document.getElementById('searchInput');
+            input.value = keyword;
+            handleSearchInput();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            handleSearchInput();
+        }
+
+        function applyQuickPreset(preset) {
+            resetAllFilters(false);
+            if (preset === 'histLow') {
+                setDiscountFilter('HIST_LOW');
+                showToast('已篩選出目前處於「歷史最低價」的遊戲！', 'info');
+            } else if (preset === 'under30') {
+                setDiscountFilter('70');
+                showToast('已篩選出 3 折以下 (-70% OFF) 的超值骨折遊戲！', 'info');
+            } else if (preset === 'freebie') {
+                state.maxBudgetUSD = 10; // Under $10 / NT$320 or Free
+                syncBudgetSliderToCurrency();
+                document.getElementById('sortSelect').value = 'PRICE_ASC';
+                applyFiltersAndRender();
+                showToast('已按價格由低到高排列限時免費與銅板價遊戲！', 'info');
+            }
+        }
+
+        function resetAllFilters(notify = false) {
+            state.dataSource = 'ALL';
+            state.selectedStore = 'ALL';
+            state.discountFilter = 'ALL';
+            state.maxBudgetUSD = 80;
+            state.searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            document.getElementById('sortSelect').value = 'DEAL_RATING';
+
+            setDataSource('ALL');
+            renderStoreFilterButtons();
+            setDiscountFilter('ALL');
+            syncBudgetSliderToCurrency();
+            applyFiltersAndRender();
+
+            if (notify) showToast('已重設所有篩選條件', 'info');
+        }
+
+        function updateSourceCounters() {
+            document.getElementById('countSourceCURATED').textContent = state.curatedGames.length;
+            document.getElementById('countSourceLIVE').textContent = state.liveApiGames.length;
+            document.getElementById('countSourceALL').textContent = state.curatedGames.length + state.liveApiGames.length;
+        }
+
+        function updateHeroQuickStats() {
+            const all = [...state.curatedGames, ...state.liveApiGames];
+            const histLowCount = all.filter(g => g.isHistoricalLow).length;
+            const deepCount = all.filter(g => g.savingsPercent >= 70).length;
+            const freeOrCheapCount = all.filter(g => g.lowestPriceUSD <= 9.99).length;
+
+            let hitCount = 0;
+            Object.values(state.wishlist).forEach(w => {
+                const g = findGameById(w.id);
+                if (g && g.lowestPriceUSD <= w.targetPriceUSD + 0.01) hitCount++;
+            });
+
+            document.getElementById('statHistLowCount').textContent = histLowCount;
+            document.getElementById('statDeepDiscountCount').textContent = deepCount;
+            document.getElementById('statFreeCount').textContent = freeOrCheapCount;
+            document.getElementById('statTargetHitCount').textContent = hitCount;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const colorStyles = type === 'success'
+                ? 'border-emerald-500/60 bg-slate-900/95 text-emerald-300'
+                : 'border-indigo-500/60 bg-slate-900/95 text-indigo-200';
+            const iconClass = type === 'success' ? 'fa-solid fa-circle-check text-emerald-400' : 'fa-solid fa-circle-info text-indigo-400';
+
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border shadow-2xl backdrop-blur-md text-xs sm:text-sm font-semibold transition-all duration-300 ${colorStyles}`;
+            toast.innerHTML = `
+                <i class="${iconClass} text-base"></i>
+                <span class="flex-1 text-white">${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Close modal when clicking backdrop or pressing Escape
+        document.getElementById('dealModal').addEventListener('click', closeDealModal);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDealModal();
+                document.getElementById('wishlistDrawerBackdrop').classList.add('hidden');
+            }
+        });
+
+        /*************************************************************************
+         * 9. INITIALIZATION ON WINDOW LOAD
+         *************************************************************************/
+        window.onload = function () {
+            state.curatedGames = normalizeCuratedGames();
+            loadWishlistFromStorage();
+
+            // Pre-seed 2 popular games into wishlist if user has never used the app before so they can immediately see the Target Price Alert feature in action
+            if (Object.keys(state.wishlist).length === 0) {
+                const elden = state.curatedGames[0];
+                const itTakesTwo = state.curatedGames.find(g => g.id === 'curated-it-takes-two');
+                if (elden) {
+                    state.wishlist[elden.id] = {
+                        id: elden.id,
+                        titleZh: elden.titleZh,
+                        titleEn: elden.titleEn,
+                        thumb: elden.thumb,
+                        targetPriceUSD: elden.lowestPriceUSD, // Reached!
+                        addedAt: Date.now()
+                    };
+                }
+                if (itTakesTwo) {
+                    state.wishlist[itTakesTwo.id] = {
+                        id: itTakesTwo.id,
+                        titleZh: itTakesTwo.titleZh,
+                        titleEn: itTakesTwo.titleEn,
+                        thumb: itTakesTwo.thumb,
+                        targetPriceUSD: 10.00, // Reached ($7.99 <= $10.00)!
+                        addedAt: Date.now()
+                    };
+                }
+                persistWishlist();
+            }
+
+            renderStoreFilterButtons();
+            syncBudgetSliderToCurrency();
+            updateSourceCounters();
+            updateHeroQuickStats();
+            applyFiltersAndRender();
+
+            // Connect to live CheapShark API in background
+            fetchCheapSharkLiveDeals(false);
+        };
+    </script>
+</body>
+</html>

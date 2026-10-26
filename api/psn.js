@@ -1,4 +1,4 @@
-// api/psn.js - 整合 PlayStation 台灣區、Epic Games 台灣官方 API 與 暴雪 Battle.net 台灣區
+// api/psn.js - 支援專屬商品頁直連 (/product/SKU)、自動鎖定最低價版本 (如 Deluxe Edition) 與即時價格同步
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -10,191 +10,180 @@ export default async function handler(req, res) {
 
   const { term = '' } = req.query;
 
-  // 1. PlayStation Store 台灣區精準校對資料庫 (包含史低價、特價起訖日與無破圖 CDN)
-  const PSN_TW_GAMES = [
+  const FETCH_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7'
+  };
+
+  // 台灣 PS Store 熱門大作「專屬商品 SKU 直連清單」
+  // 針對常以豪華版特價的遊戲，直接鎖定當下最便宜的專屬 Product ID，點擊直接進購買頁，不跳搜尋頁
+  const PSN_TW_PRODUCTS = [
     {
-      id: 'psn-gow-ragnarok',
+      id: 'HP0101-PPSA10644_00-DIGITALDELUXE000',
       platform: 'psn',
-      deviceText: 'PS5 / PS4',
-      title: '戰神：諸神黃昏 (God of War Ragnarök)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg',
-      originalPrice: 1990,
-      finalPrice: 1194,
-      historicalLow: 1194,
-      discount: 40,
-      saleStart: '2026/10/16',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('God of War Ragnarök'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('God of War Ragnarök')
-    },
-    {
-      id: 'psn-stellar-blade',
-      platform: 'psn',
-      deviceText: 'PS5',
-      title: '劍星 (Stellar Blade)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/header.jpg',
-      originalPrice: 1990,
-      finalPrice: 1492,
-      historicalLow: 1492,
-      discount: 25,
-      saleStart: '2026/10/20',
+      deviceText: 'PS5 (豪華版特賣)',
+      title: '沉默之丘 2 重製版 豪華版 (SILENT HILL 2 Deluxe Edition)',
+      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg',
+      originalPrice: 2271,
+      finalPrice: 908,
+      historicalLow: 908,
+      discount: 60,
+      saleStart: '2026/10/21',
       saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('劍星 Stellar Blade'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Stellar Blade')
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0101-PPSA10644_00-DIGITALDELUXE000',
+      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('SILENT HILL 2')
     },
     {
-      id: 'psn-spiderman-2',
+      id: 'JP0101-PPSA21159_00-DIGITALDELUXE000',
       platform: 'psn',
-      deviceText: 'PS5',
-      title: '漫威蜘蛛人 2 (Marvel\'s Spider-Man 2)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2651280/header.jpg',
-      originalPrice: 1990,
-      finalPrice: 1194,
-      historicalLow: 1194,
-      discount: 40,
-      saleStart: '2026/10/16',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('Marvel\'s Spider-Man 2'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Spider-Man 2')
+      deviceText: 'PS5 (豪華版特賣)',
+      title: 'SILENT HILL f - Deluxe Edition (沉默之丘 f 豪華版)',
+      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/header.jpg',
+      originalPrice: 2321,
+      finalPrice: 1160,
+      historicalLow: 1160,
+      discount: 50,
+      saleStart: '2026/10/21',
+      saleEnd: '2026/11/04',
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/JP0101-PPSA21159_00-DIGITALDELUXE000',
+      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('SILENT HILL f')
     },
     {
-      id: 'psn-ff7-rebirth',
+      id: 'HP9000-PPSA04558_00-RONINFULLGAME001',
       platform: 'psn',
-      deviceText: 'PS5',
-      title: 'Final Fantasy VII Rebirth (最終幻想7 重生)',
+      deviceText: 'PS5 (標準版)',
+      title: '浪人崛起 (Rise of the Ronin)',
+      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1340990/header.jpg',
+      originalPrice: 2290,
+      finalPrice: 1511,
+      historicalLow: 1390,
+      discount: 34,
+      saleStart: '2026/10/21',
+      saleEnd: '2026/11/04',
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-PPSA04558_00-RONINFULLGAME001',
+      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('浪人崛起')
+    },
+    {
+      id: 'HP0082-PPSA08670_00-0783148264580163',
+      platform: 'psn',
+      deviceText: 'PS5 (中韓文版)',
+      title: 'Final Fantasy VII Rebirth (最終幻想 7 重生)',
       image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2909400/header.jpg',
       originalPrice: 1990,
-      finalPrice: 1333,
-      historicalLow: 1393,
-      discount: 33,
-      saleStart: '2026/10/18',
-      saleEnd: '2026/11/01',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('Final Fantasy VII Rebirth'),
+      finalPrice: 1194,
+      historicalLow: 1194,
+      discount: 40,
+      saleStart: '2026/10/21',
+      saleEnd: '2026/11/04',
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0082-PPSA08670_00-0783148264580163',
       extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Final Fantasy VII Rebirth')
     },
     {
-      id: 'psn-ghost-of-tsushima',
-      platform: 'psn',
-      deviceText: 'PS5 / PS4',
-      title: '對馬戰鬼 導演剪輯版 (Ghost of Tsushima Director\'s Cut)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2215430/header.jpg',
-      originalPrice: 1990,
-      finalPrice: 835,
-      historicalLow: 835,
-      discount: 58,
-      saleStart: '2026/10/16',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('對馬戰鬼 導演剪輯版'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Ghost of Tsushima')
-    },
-    {
-      id: 'psn-tlou-part1',
-      platform: 'psn',
-      deviceText: 'PS5',
-      title: '最後生還者 首部曲 (The Last of Us Part I)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg',
-      originalPrice: 1990,
-      finalPrice: 835,
-      historicalLow: 835,
-      discount: 58,
-      saleStart: '2026/10/20',
-      saleEnd: '2026/11/05',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('The Last of Us Part I'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('The Last of Us Part I')
-    },
-    {
-      id: 'psn-re4-remake',
+      id: 'HP0102-PPSA09418_00-RE4RMAINGAME0000',
       platform: 'psn',
       deviceText: 'PS5 / PS4',
       title: '惡靈古堡 4 重製版 (Resident Evil 4)',
       image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg',
-      originalPrice: 1240,
-      finalPrice: 620,
+      originalPrice: 1250,
+      finalPrice: 625,
       historicalLow: 620,
       discount: 50,
-      saleStart: '2026/10/18',
+      saleStart: '2026/10/21',
       saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('Resident Evil 4'),
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0102-PPSA09418_00-RE4RMAINGAME0000',
       extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Resident Evil 4')
     },
     {
-      id: 'psn-silent-hill-2',
-      platform: 'psn',
-      deviceText: 'PS5',
-      title: '沉默之丘 2 重製版 (SILENT HILL 2)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg',
-      originalPrice: 1990,
-      finalPrice: 1393,
-      historicalLow: 1592,
-      discount: 30,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('SILENT HILL 2'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('SILENT HILL 2')
-    },
-    {
-      id: 'psn-horizon-fw',
+      id: 'HP0700-PPSA04608_00-ELDENRING0000000',
       platform: 'psn',
       deviceText: 'PS5 / PS4',
-      title: '地平線 西域禁地 完全版 (Horizon Forbidden West)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/header.jpg',
-      originalPrice: 1790,
-      finalPrice: 1199,
-      historicalLow: 1199,
-      discount: 33,
-      saleStart: '2026/10/16',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('Horizon Forbidden West'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Horizon Forbidden West')
-    },
-    {
-      id: 'psn-helldivers-2',
-      platform: 'psn',
-      deviceText: 'PS5',
-      title: '絕地戰兵 2 (HELLDIVERS 2)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg',
-      originalPrice: 1190,
-      finalPrice: 952,
-      historicalLow: 952,
-      discount: 20,
-      saleStart: '2026/10/18',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('HELLDIVERS 2'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('HELLDIVERS 2')
-    },
-    {
-      id: 'psn-elden-ring',
-      platform: 'psn',
-      deviceText: 'PS5 / PS4',
-      title: '艾爾登法環 (Elden Ring)',
+      title: '艾爾登法環 (Elden Ring 標準版)',
       image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
       originalPrice: 1790,
       finalPrice: 1253,
       historicalLow: 1253,
       discount: 30,
-      saleStart: '2026/10/16',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('Elden Ring'),
+      saleStart: '2026/10/21',
+      saleEnd: '2026/11/04',
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0700-PPSA04608_00-ELDENRING0000000',
       extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Elden Ring')
     },
     {
-      id: 'psn-sekiro',
+      id: 'HP9000-PPSA13198_00-STELLARBLADE0000',
+      platform: 'psn',
+      deviceText: 'PS5',
+      title: '劍星 (Stellar Blade 標準版)',
+      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/header.jpg',
+      originalPrice: 1990,
+      finalPrice: 1492,
+      historicalLow: 1492,
+      discount: 25,
+      saleStart: '2026/10/21',
+      saleEnd: '2026/11/04',
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-PPSA13198_00-STELLARBLADE0000',
+      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Stellar Blade')
+    },
+    {
+      id: 'HP9000-CUSA03023_00-BLOODBORNE0000AS',
       platform: 'psn',
       deviceText: 'PS4 / PS5',
-      title: '隻狼：暗影雙死 (Sekiro: Shadows Die Twice)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg',
-      originalPrice: 1590,
-      finalPrice: 795,
-      historicalLow: 795,
-      discount: 50,
-      saleStart: '2026/10/16',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/search/' + encodeURIComponent('Sekiro'),
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Sekiro')
+      title: '血源詛咒 老獵人版 (Bloodborne The Old Hunters Edition)',
+      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg',
+      originalPrice: 1090,
+      finalPrice: 436,
+      historicalLow: 436,
+      discount: 60,
+      saleStart: '2026/10/21',
+      saleEnd: '2026/11/04',
+      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-CUSA03023_00-BLOODBORNE0000AS',
+      extraUrl: 'https://psdeals.net/tw-store/search?search_query=' + encodeURIComponent('Bloodborne')
     }
   ];
 
-  // 2. 暴雪 Battle.net 台灣區官方資料庫 (tw.shop.battle.net)
+  // 即時同步單一 PS Store 商品頁面的最新台幣售價與截止日 (若未被 Sony WAF 阻擋則自動覆蓋最新價格)
+  async function refreshLivePsnProduct(item) {
+    try {
+      const res = await fetch(item.storeUrl, { headers: FETCH_HEADERS });
+      if (!res.ok) return item;
+      const html = await res.text();
+      if (html.includes('Access Denied')) return item;
+
+      // 從官方商品頁文本提取「NT$908 NT$2,271 省下60% 優惠截止於2026/11/4」格式
+      const discountBlockMatch = html.match(/NT\$([\d,]+)\s*NT\$([\d,]+)[\s\S]{0,120}?省下\s*(\d+)%/i);
+      if (discountBlockMatch) {
+        const fin = parseInt(discountBlockMatch[1].replace(/,/g, ''), 10);
+        const orig = parseInt(discountBlockMatch[2].replace(/,/g, ''), 10);
+        const disc = parseInt(discountBlockMatch[3], 10);
+        if (fin > 0 && orig >= fin) {
+          item.finalPrice = fin;
+          item.originalPrice = orig;
+          item.discount = disc;
+          if (fin < item.historicalLow) item.historicalLow = fin;
+        }
+      } else {
+        // 若目前已恢復原價 (無折扣)
+        const regularMatch = html.match(/上市價格：\s*NT\$([\d,]+)/i);
+        if (regularMatch && !html.includes('省下')) {
+          const orig = parseInt(regularMatch[1].replace(/,/g, ''), 10);
+          if (orig > 0) {
+            item.originalPrice = orig;
+            item.finalPrice = orig;
+            item.discount = 0;
+          }
+        }
+      }
+
+      // 提取優惠截止日期 (例如：優惠截止於2026/11/4)
+      const endMatch = html.match(/優惠截止於\s*(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+      if (endMatch) {
+        item.saleEnd = `${endMatch[1]}/${String(endMatch[2]).padStart(2, '0')}/${String(endMatch[3]).padStart(2, '0')}`;
+      }
+    } catch (e) {}
+    return item;
+  }
+
+  // 暴雪 Battle.net 台灣區官方資料庫
   const BLIZZARD_TW_GAMES = [
     {
       id: 'bnet-d4-vessel',
@@ -270,25 +259,10 @@ export default async function handler(req, res) {
       saleEnd: '2026/11/04',
       storeUrl: 'https://tw.shop.battle.net/zh-tw/family/starcraft-ii',
       extraUrl: 'https://tw.shop.battle.net/zh-tw/family/starcraft-ii'
-    },
-    {
-      id: 'bnet-ow2-invasion',
-      platform: 'blizzard',
-      deviceText: 'Battle.net (PC)',
-      title: '鬥陣特攻 2：終極戰令組合包 (Overwatch 2)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2357570/header.jpg',
-      originalPrice: 1249,
-      finalPrice: 836,
-      historicalLow: 836,
-      discount: 33,
-      saleStart: '2026/10/18',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://tw.shop.battle.net/zh-tw/family/overwatch',
-      extraUrl: 'https://tw.shop.battle.net/zh-tw/family/overwatch'
     }
   ];
 
-  // 3. Epic Games Store 台灣區精選大作 + 即時免費 API 整合
+  // Epic Games Store 台灣區精選大作
   const EPIC_CURATED_TW = [
     {
       id: 'epic-alan-wake-2',
@@ -349,21 +323,6 @@ export default async function handler(req, res) {
       saleEnd: '2026/11/02',
       storeUrl: 'https://store.epicgames.com/zh-Hant/p/the-witcher-3-wild-hunt',
       extraUrl: 'https://isthereanydeal.com/game/the-witcher-3-wild-hunt-complete-edition/info/'
-    },
-    {
-      id: 'epic-dead-island-2',
-      platform: 'epic',
-      deviceText: 'Epic Games (PC)',
-      title: '死亡之島 2 (Dead Island 2)',
-      image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/934700/header.jpg',
-      originalPrice: 1560,
-      finalPrice: 780,
-      historicalLow: 780,
-      discount: 50,
-      saleStart: '2026/10/18',
-      saleEnd: '2026/11/02',
-      storeUrl: 'https://store.epicgames.com/zh-Hant/p/dead-island-2',
-      extraUrl: 'https://isthereanydeal.com/game/dead-island-2/info/'
     }
   ];
 
@@ -398,7 +357,6 @@ export default async function handler(req, res) {
 
       for (const el of elements) {
         if (!el || !el.title || el.title === 'Mystery Game') continue;
-
         const totalPrice = el.price?.totalPrice;
         if (!totalPrice) continue;
 
@@ -406,7 +364,6 @@ export default async function handler(req, res) {
         let orig = parsePrice(totalPrice.fmtPrice?.originalPrice, totalPrice.originalPrice, decimals);
         let fin = parsePrice(totalPrice.fmtPrice?.discountPrice, totalPrice.discountPrice, decimals);
 
-        // 檢查是否為當週限時免費或特價促銷
         const promoOffers = el.promotions?.promotionalOffers?.[0]?.promotionalOffers?.[0];
         let saleStart = formatIsoDate(promoOffers?.startDate);
         let saleEnd = formatIsoDate(promoOffers?.endDate);
@@ -415,13 +372,11 @@ export default async function handler(req, res) {
           fin = 0;
           if (orig === 0) orig = 450;
         }
-
         if (orig === 0 && fin === 0) continue;
 
         const discount = orig > fin ? Math.round((1 - fin / orig) * 100) : 0;
         if (discount === 0) continue;
 
-        // 取得橫幅圖片
         const images = Array.isArray(el.keyImages) ? el.keyImages : [];
         const bestImg = images.find(i => i.type === 'OfferImageWide')
           || images.find(i => i.type === 'DieselStoreFrontWide')
@@ -451,7 +406,6 @@ export default async function handler(req, res) {
           extraUrl: 'https://store.epicgames.com/zh-Hant/free-games'
         });
       }
-
       return liveItems;
     } catch (e) {
       return [];
@@ -459,28 +413,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    const liveEpic = await fetchLiveEpicTw();
+    // 同步更新 PS Store 商品最新價格與 Epic 即時免費清單
+    const [updatedPsn, liveEpic] = await Promise.all([
+      Promise.all(PSN_TW_PRODUCTS.map(item => refreshLivePsnProduct({ ...item }))),
+      fetchLiveEpicTw()
+    ]);
+
     const allEpic = [...liveEpic, ...EPIC_CURATED_TW];
 
     if (term) {
       const q = term.toLowerCase().trim();
       const filterByTerm = (arr) => arr.filter(g => g.title.toLowerCase().includes(q) || g.deviceText.toLowerCase().includes(q));
       return res.status(200).json({
-        psn: filterByTerm(PSN_TW_GAMES),
+        psn: filterByTerm(updatedPsn),
         epic: filterByTerm(allEpic),
         blizzard: filterByTerm(BLIZZARD_TW_GAMES)
       });
     }
 
     return res.status(200).json({
-      psn: PSN_TW_GAMES,
+      psn: updatedPsn,
       epic: allEpic,
       blizzard: BLIZZARD_TW_GAMES
     });
   } catch (error) {
     return res.status(500).json({
       error: error.message,
-      psn: PSN_TW_GAMES,
+      psn: PSN_TW_PRODUCTS,
       epic: EPIC_CURATED_TW,
       blizzard: BLIZZARD_TW_GAMES
     });

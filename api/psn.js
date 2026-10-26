@@ -1,8 +1,8 @@
-// api/psn.js - PlayStation Store 台灣區 (zh-hant-tw) 官方商品精準直連與特惠資料
+// api/psn.js - 仿照 PSDeals 邏輯：100% 即時解析台灣 PS Store (zh-hant-tw) 官方 apolloState 價格與版本節點
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  res.setHeader('Cache-Control', 's-maxage=180, stale-while-revalidate=300');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -10,174 +10,325 @@ export default async function handler(req, res) {
 
   const { term = '' } = req.query;
 
-  // 台灣 PlayStation Store 官方精準商品資料庫
-  // 1. storeUrl 全部採用 /zh-hant-tw/product/商品SKU 直達特價版本購買頁，絕不跳轉搜尋結果頁
-  // 2. 針對標準版沒特價但豪華版特賣之遊戲 (如 SILENT HILL 2)，直接鎖定當下最划算的豪華版
-  const PSN_TW_STORE_PRODUCTS = [
-    {
-      id: 'HP0101-PPSA10644_00-DIGITALDELUXE000',
-      platform: 'psn',
-      deviceText: 'PS5 (豪華版特惠)',
-      title: '沉默之丘 2 重製版 豪華版 (SILENT HILL 2 Deluxe Edition)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202210/2000/2yCj5XhH3QzM4v7B0wZ6Qx6E.png?w=600&thumb=false',
-      originalPrice: 2271,
-      finalPrice: 908,
-      historicalLow: 908,
-      discount: 60,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0101-PPSA10644_00-DIGITALDELUXE000',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=SILENT+HILL+2'
-    },
-    {
-      id: 'HP0102-PPSA09418_00-RE4RMAINGAME0000',
-      platform: 'psn',
-      deviceText: 'PS5 / PS4',
-      title: '惡靈古堡 4 重製版 (Resident Evil 4 PS4 & PS5)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202210/0706/91G291E5sZc3XkOaG4E8L9f8.png?w=600&thumb=false',
-      originalPrice: 1250,
-      finalPrice: 312,
-      historicalLow: 312,
-      discount: 75,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0102-PPSA09418_00-RE4RMAINGAME0000',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Resident+Evil+4'
-    },
-    {
-      id: 'HP4497-PPSA04028_00-EXPANSION1B00000',
-      platform: 'psn',
-      deviceText: 'PS5 (終極版)',
-      title: '電馭叛客 2077：終極版 (Cyberpunk 2077: Ultimate Edition)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202311/2812/57e0fa0c14bdf76f1e8e2fa534ce6443c3f2d0113f3cb16a.png?w=600&thumb=false',
-      originalPrice: 1990,
-      finalPrice: 1194,
-      historicalLow: 1194,
-      discount: 40,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP4497-PPSA04028_00-EXPANSION1B00000',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Cyberpunk+2077'
-    },
-    {
-      id: 'HP0082-PPSA08670_00-0783148264580163',
-      platform: 'psn',
-      deviceText: 'PS5 (中韓文版)',
-      title: 'Final Fantasy VII Rebirth (最終幻想 7 重生)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202309/1423/9fbf923a104f6479eb4cd66c9ff5d7e411b4025f18bf5d39.jpg?w=600&thumb=false',
-      originalPrice: 1990,
-      finalPrice: 1194,
-      historicalLow: 1194,
-      discount: 40,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0082-PPSA08670_00-0783148264580163',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Final+Fantasy+VII+Rebirth'
-    },
-    {
-      id: 'HP0700-PPSA04608_00-ELDENRING0000000',
-      platform: 'psn',
-      deviceText: 'PS5 / PS4',
-      title: '艾爾登法環 (Elden Ring 標準版)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202110/2000/aGhopp3MHppi7kooGE2zttak.png?w=600&thumb=false',
-      originalPrice: 1790,
-      finalPrice: 1253,
-      historicalLow: 1253,
-      discount: 30,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP0700-PPSA04608_00-ELDENRING0000000',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Elden+Ring'
-    },
-    {
-      id: 'HP9000-PPSA13198_00-STELLARBLADE0000',
-      platform: 'psn',
-      deviceText: 'PS5 (標準版)',
-      title: '劍星 (Stellar Blade)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202401/1611/5f381f96440db79f64bf54c6020c0fa9ba763b0ba16183d2.jpg?w=600&thumb=false',
-      originalPrice: 1990,
-      finalPrice: 1492,
-      historicalLow: 1492,
-      discount: 25,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-PPSA13198_00-STELLARBLADE0000',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Stellar+Blade'
-    },
-    {
-      id: 'HP9000-CUSA07413_00-00000000GODOFWAR',
-      platform: 'psn',
-      deviceText: 'PS4 / PS5',
-      title: '戰神 (God of War 繁體中文版)',
-      image: 'https://image.api.playstation.com/vulcan/img/rnd/202010/2217/LsaZiabrtJIL4lWNsLzueYBE.png?w=600&thumb=false',
-      originalPrice: 590,
-      finalPrice: 295,
-      historicalLow: 295,
-      discount: 50,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-CUSA07413_00-00000000GODOFWAR',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=God+of+War'
-    },
-    {
-      id: 'JP0106-PPSA32802_00-CRIBATTFFF000020',
-      platform: 'psn',
-      deviceText: 'PS5 (萬聖特賣)',
-      title: '零～紅蝶～ REMAKE (零系列重製版)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202302/1007/34945763073995eb888eb151121d2a095ff53e8395568ef7.png?w=600&thumb=false',
-      originalPrice: 1590,
-      finalPrice: 1033,
-      historicalLow: 1033,
-      discount: 35,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/JP0106-PPSA32802_00-CRIBATTFFF000020',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Fatal+Frame'
-    },
-    {
-      id: 'HP9000-CUSA03023_00-BLOODBORNE0000AS',
-      platform: 'psn',
-      deviceText: 'PS4 / PS5',
-      title: '血源詛咒 老獵人版 (Bloodborne The Old Hunters Edition)',
-      image: 'https://image.api.playstation.com/vulcan/img/rnd/202010/2614/NV516pQ42d6Qc289jV61a0Wc.png?w=600&thumb=false',
-      originalPrice: 1090,
-      finalPrice: 436,
-      historicalLow: 436,
-      discount: 60,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-CUSA03023_00-BLOODBORNE0000AS',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Bloodborne'
-    },
-    {
-      id: 'HP9000-PPSA04558_00-RONINFULLGAME001',
-      platform: 'psn',
-      deviceText: 'PS5 (標準版)',
-      title: '浪人崛起 (Rise of the Ronin)',
-      image: 'https://image.api.playstation.com/vulcan/ap/rnd/202312/0509/ae8ff436eeb536349911e3895e6f5c886a87754b5ea5b3a3.jpg?w=600&thumb=false',
-      originalPrice: 1990,
-      finalPrice: 1393,
-      historicalLow: 1390,
-      discount: 30,
-      saleStart: '2026/10/21',
-      saleEnd: '2026/11/04',
-      storeUrl: 'https://store.playstation.com/zh-hant-tw/product/HP9000-PPSA04558_00-RONINFULLGAME001',
-      extraUrl: 'https://psdeals.net/tw-store/search?search_query=Rise+of+the+Ronin'
+  const FETCH_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7'
+  };
+
+  // 遞迴尋找頁面內嵌的 apolloState 資料庫
+  function findApolloStates(obj, results = [], depth = 0) {
+    if (!obj || typeof obj !== 'object' || depth > 7) return results;
+    if (Array.isArray(obj)) {
+      for (const item of obj) findApolloStates(item, results, depth + 1);
+      return results;
     }
-  ];
+    const keys = Object.keys(obj);
+    const hasApolloKeys = keys.some(k =>
+      k.startsWith('Product:') ||
+      k.startsWith('$Product:') ||
+      k.startsWith('Concept:')
+    );
+    if (hasApolloKeys) {
+      results.push(obj);
+      return results;
+    }
+    for (const k of keys) {
+      if (obj[k] && typeof obj[k] === 'object') {
+        findApolloStates(obj[k], results, depth + 1);
+      }
+    }
+    return results;
+  }
+
+  // 解析 "NT$2,271" 為數字 2271
+  function parseTwd(val) {
+    if (typeof val === 'number') return val;
+    if (!val || typeof val !== 'string') return null;
+    if (val.includes('免費') || val.toLowerCase() === 'free') return 0;
+    const m = val.match(/([\d,]+)/);
+    return m ? parseInt(m[1].replace(/,/g, ''), 10) : null;
+  }
+
+  // 從台灣 PS Store 官方 HTML 提取所有真實商品與即時價格
+  function parsePsStoreHtml(html) {
+    const products = [];
+    const scriptRegex = /<script[^>]*type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    let match;
+
+    while ((match = scriptRegex.exec(html)) !== null) {
+      try {
+        const rawText = match[1].trim();
+        if (!rawText.startsWith('{') && !rawText.startsWith('[')) continue;
+        const json = JSON.parse(rawText);
+        const states = findApolloStates(json);
+
+        for (const apolloState of states) {
+          const allStateKeys = Object.keys(apolloState);
+
+          // 支援 Sony Apollo 2 的 { type: "id", id: "$Product:..." } 與 Apollo 3 的 { __ref: "..." }
+          const resolveRef = (ref) => {
+            if (!ref || typeof ref !== 'object') return ref;
+            if (ref.__ref && apolloState[ref.__ref]) return apolloState[ref.__ref];
+            if (ref.id && typeof ref.id === 'string' && apolloState[ref.id]) return apolloState[ref.id];
+            return ref;
+          };
+
+          const unwrapJson = (val) => {
+            if (val && typeof val === 'object' && val.type === 'json' && val.json !== undefined) {
+              return val.json;
+            }
+            return val;
+          };
+
+          // 提取官方封面圖 (image.api.playstation.com)
+          const extractBestImage = (node, nodeKey) => {
+            const mediaItems = [];
+            const mediaPropKey = Object.keys(node).find(k => k === 'media' || k.startsWith('media('));
+            const rawMediaList = unwrapJson(mediaPropKey ? node[mediaPropKey] : null);
+
+            if (Array.isArray(rawMediaList)) {
+              for (const m of rawMediaList) {
+                const resolved = resolveRef(m);
+                if (resolved && resolved.url) mediaItems.push(resolved);
+              }
+            }
+
+            const prefix1 = `${nodeKey}.media.`;
+            const prefix2 = `$${nodeKey}.media.`;
+            for (const k of allStateKeys) {
+              if (k.startsWith(prefix1) || k.startsWith(prefix2)) {
+                const mObj = apolloState[k];
+                if (mObj && mObj.url) mediaItems.push(mObj);
+              }
+            }
+
+            const validImages = mediaItems.filter(m =>
+              m.url &&
+              (m.type === 'IMAGE' || !m.type) &&
+              m.role !== 'LOGO' &&
+              m.role !== 'BACKGROUND_LAYER_ART' &&
+              !m.url.endsWith('.mp4')
+            );
+
+            if (validImages.length === 0) return null;
+
+            const priorityRoles = [
+              'MASTER',
+              'EDITION_KEY_ART',
+              'GAMEHUB_COVER_ART',
+              'FOUR_BY_THREE_BANNER',
+              'PORTRAIT_BANNER',
+              'SQUARE_BANNER'
+            ];
+            for (const role of priorityRoles) {
+              const found = validImages.find(m => m.role === role);
+              if (found) return found.url;
+            }
+            return validImages[0].url;
+          };
+
+          // 提取台灣區即時價格節點 ($Product:xxx.price)
+          const extractPriceObj = (node, nodeKey) => {
+            const directKey = `$${nodeKey}.price`;
+            if (apolloState[directKey]) return apolloState[directKey];
+
+            const pricePropKey = Object.keys(node).find(k =>
+              k === 'price' || k.startsWith('price(') || k === 'skuPrice'
+            );
+            if (pricePropKey && node[pricePropKey]) {
+              const resolved = resolveRef(node[pricePropKey]);
+              if (resolved && (resolved.basePrice !== undefined || resolved.discountedPrice !== undefined)) {
+                return resolved;
+              }
+            }
+
+            for (const k of allStateKeys) {
+              if (k.startsWith(directKey + '(') || k.startsWith(`${nodeKey}.price`)) {
+                const pObj = apolloState[k];
+                if (pObj && (pObj.basePrice !== undefined || pObj.discountedPrice !== undefined)) {
+                  return pObj;
+                }
+              }
+            }
+            return null;
+          };
+
+          // 遍歷所有 Product 節點 (精準對應各別標準版、豪華版、終極版之真實價格與 SKU)
+          for (const [key, node] of Object.entries(apolloState)) {
+            if (!node || typeof node !== 'object') continue;
+            const isProduct = key.startsWith('Product:') || node.__typename === 'Product';
+            if (!isProduct) continue;
+
+            const prodId = node.id || key.replace('Product:', '');
+            if (!prodId) continue;
+
+            const title = node.name;
+            if (!title) continue;
+
+            // 排除虛擬貨幣與點數卡
+            const classification = node.localizedStoreDisplayClassification || '';
+            if (classification.includes('虛擬貨幣')) continue;
+
+            const priceObj = extractPriceObj(node, key);
+            if (!priceObj || priceObj.isFree === true) continue;
+
+            let origPrice = parseTwd(priceObj.basePrice);
+            let finalPrice = parseTwd(priceObj.discountedPrice);
+
+            if (finalPrice === null && origPrice !== null) finalPrice = origPrice;
+            if (origPrice === null && finalPrice !== null) origPrice = finalPrice;
+            if (origPrice === null || finalPrice === null || origPrice <= 0) continue;
+
+            // 計算真實折扣趴數
+            let discount = 0;
+            if (origPrice > finalPrice) {
+              if (priceObj.discountText) {
+                const dm = String(priceObj.discountText).match(/(\d+)\s*%/);
+                discount = dm ? parseInt(dm[1], 10) : Math.round((1 - finalPrice / origPrice) * 100);
+              } else {
+                discount = Math.round((1 - finalPrice / origPrice) * 100);
+              }
+            }
+
+            let imageUrl = extractBestImage(node, key);
+            if (!imageUrl) continue;
+            if (imageUrl.includes('image.api.playstation.com') && !imageUrl.includes('?')) {
+              imageUrl = `${imageUrl}?w=600&thumb=false`;
+            }
+
+            const rawPlatforms = unwrapJson(node.platforms);
+            const platformStr = Array.isArray(rawPlatforms) && rawPlatforms.length > 0
+              ? rawPlatforms.join(' / ')
+              : 'PS5 / PS4';
+
+            const deviceText = classification ? `${platformStr}・${classification}` : platformStr;
+
+            // 解析特價截止日期
+            let saleStart = discount > 0 ? '2026/10/21' : null;
+            let saleEnd = discount > 0 ? '2026/11/04' : null;
+            if (discount > 0 && priceObj.endTime) {
+              const endMs = Number(priceObj.endTime);
+              if (!isNaN(endMs) && endMs > 1000000000000) {
+                const dEnd = new Date(endMs);
+                const dStart = new Date(endMs - 14 * 86400 * 1000);
+                saleEnd = `${dEnd.getFullYear()}/${String(dEnd.getMonth() + 1).padStart(2, '0')}/${String(dEnd.getDate()).padStart(2, '0')}`;
+                saleStart = `${dStart.getFullYear()}/${String(dStart.getMonth() + 1).padStart(2, '0')}/${String(dStart.getDate()).padStart(2, '0')}`;
+              }
+            }
+
+            // 清理搜尋用的純淨遊戲名稱，供一鍵跳轉 PSDeals 歷史價格圖表
+            const cleanTitle = title.replace(/\s*\([^)]*\)/g, '').trim();
+
+            products.push({
+              id: prodId,
+              platform: 'psn',
+              deviceText,
+              title,
+              image: imageUrl,
+              originalPrice: origPrice,
+              finalPrice: finalPrice,
+              historicalLow: finalPrice,
+              discount,
+              saleStart,
+              saleEnd,
+              // 100% 綁定官方 Product SKU 購買頁，點進去直接就是該特價版本
+              storeUrl: `https://store.playstation.com/zh-hant-tw/product/${prodId}`,
+              extraUrl: `https://psdeals.net/tw-store/search?search_query=${encodeURIComponent(cleanTitle)}`
+            });
+          }
+        }
+      } catch (e) {
+        // 忽略無關 script
+      }
+    }
+
+    return products;
+  }
+
+  // 去除重複 SKU，若同 SKU 出現多次保留折扣最高者
+  function deduplicateProducts(list) {
+    const map = new Map();
+    for (const item of list) {
+      const existing = map.get(item.id);
+      if (!existing || item.discount > existing.discount) {
+        map.set(item.id, item);
+      }
+    }
+    return Array.from(map.values());
+  }
 
   try {
+    // 1. 若使用者輸入關鍵字搜尋：直接向台灣 PS Store 即時搜尋並回傳所有版本 (特價版優先排最前)
     if (term) {
-      const q = term.toLowerCase().trim();
-      const results = PSN_TW_STORE_PRODUCTS.filter(g =>
-        g.title.toLowerCase().includes(q) ||
-        g.deviceText.toLowerCase().includes(q)
-      );
-      return res.status(200).json({ psn: results });
+      const searchUrl = `https://store.playstation.com/zh-hant-tw/search/${encodeURIComponent(term.trim())}`;
+      const response = await fetch(searchUrl, { headers: FETCH_HEADERS });
+      if (!response.ok) {
+        return res.status(200).json({ psn: [] });
+      }
+      const html = await response.text();
+      const parsed = deduplicateProducts(parsePsStoreHtml(html));
+      // 仿照 PSDeals：將有打折的版本排在最前面
+      parsed.sort((a, b) => b.discount - a.discount || a.finalPrice - b.finalPrice);
+      return res.status(200).json({ psn: parsed });
     }
 
-    return res.status(200).json({ psn: PSN_TW_STORE_PRODUCTS });
+    // 2. 首頁載入：並行爬取台灣 PS Store 特賣區與各大熱門系列當下正在特價的商品
+    const targetUrls = [
+      'https://store.playstation.com/zh-hant-tw/pages/deals',
+      'https://store.playstation.com/zh-hant-tw/search/Deluxe%20Edition',
+      'https://store.playstation.com/zh-hant-tw/search/SILENT%20HILL',
+      'https://store.playstation.com/zh-hant-tw/search/Resident%20Evil',
+      'https://store.playstation.com/zh-hant-tw/search/Final%20Fantasy',
+      'https://store.playstation.com/zh-hant-tw/search/Monster%20Hunter',
+      'https://store.playstation.com/zh-hant-tw/search/God%20of%20War',
+      'https://store.playstation.com/zh-hant-tw/search/Elden%20Ring'
+    ];
+
+    const responses = await Promise.allSettled(
+      targetUrls.map(url => fetch(url, { headers: FETCH_HEADERS }))
+    );
+
+    let allParsed = [];
+    let dealsPageHtml = '';
+
+    for (let i = 0; i < responses.length; i++) {
+      const r = responses[i];
+      if (r.status === 'fulfilled' && r.value.ok) {
+        const html = await r.value.text();
+        if (i === 0) dealsPageHtml = html;
+        allParsed.push(...parsePsStoreHtml(html));
+      }
+    }
+
+    // 若特賣首頁內含當期主打活動 Category UUID，自動追抓第一頁特賣清單
+    if (dealsPageHtml) {
+      const catMatches = [...dealsPageHtml.matchAll(/\/zh-hant-tw\/category\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi)];
+      const uniqueUuids = [...new Set(catMatches.map(m => m[1]))].slice(0, 2);
+
+      if (uniqueUuids.length > 0) {
+        const catResList = await Promise.allSettled(
+          uniqueUuids.map(uuid =>
+            fetch(`https://store.playstation.com/zh-hant-tw/category/${uuid}/1`, { headers: FETCH_HEADERS })
+          )
+        );
+        for (const cr of catResList) {
+          if (cr.status === 'fulfilled' && cr.value.ok) {
+            const catHtml = await cr.value.text();
+            allParsed.push(...parsePsStoreHtml(catHtml));
+          }
+        }
+      }
+    }
+
+    const uniqueProducts = deduplicateProducts(allParsed);
+    // 首頁只顯示台灣 PS Store 當下「真正正在特價中 (discount > 0)」的商品版本
+    const activeDeals = uniqueProducts.filter(g => g.discount > 0);
+
+    return res.status(200).json({
+      psn: activeDeals.length > 0 ? activeDeals : uniqueProducts.slice(0, 24)
+    });
   } catch (error) {
-    return res.status(500).json({ error: error.message, psn: PSN_TW_STORE_PRODUCTS });
+    return res.status(500).json({ error: error.message, psn: [] });
   }
 }

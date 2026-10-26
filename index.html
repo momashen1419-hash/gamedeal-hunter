@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GameDeal Hunter | Steam・Epic・暴雪 台灣區史低與特價期限比價網</title>
+  <title>GameDeal Hunter | Steam & PlayStation 台灣區即時特價與史低比價網</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -33,49 +33,46 @@
   <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <!-- 三大 PC 平台複合圖標 -->
+        <!-- Steam 與 PlayStation 雙平台 Logo -->
         <div class="flex items-center -space-x-1.5">
-          <div class="w-8 h-8 rounded-xl bg-[#1b2838] border border-[#66c0f4]/50 flex items-center justify-center text-[#66c0f4] text-sm shadow">
+          <div class="w-9 h-9 rounded-xl bg-[#1b2838] border border-[#66c0f4]/50 flex items-center justify-center text-[#66c0f4] text-base shadow">
             <i class="fa-brands fa-steam"></i>
           </div>
-          <div class="w-8 h-8 rounded-xl bg-neutral-900 border border-amber-400/50 flex items-center justify-center text-amber-400 text-[10px] font-black shadow">
-            EPIC
-          </div>
-          <div class="w-8 h-8 rounded-xl bg-[#0074e0] border border-cyan-300/50 flex items-center justify-center text-white text-sm shadow">
-            <i class="fa-brands fa-battle-net"></i>
+          <div class="w-9 h-9 rounded-xl bg-[#003791] border border-sky-400/50 flex items-center justify-center text-white text-base shadow">
+            <i class="fa-brands fa-playstation"></i>
           </div>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">GameDeal Hunter</h1>
             <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
-              TW 台灣區 PC 三大平台史低監測
+              TW 台灣區 Steam & PS Store 官方直連
             </span>
           </div>
-          <p class="text-xs text-slate-400" id="connectionStatus">正在同步台灣區 Steam、Epic Games 與暴雪最新價格...</p>
+          <p class="text-xs text-slate-400" id="connectionStatus">正在同步台灣區 Steam 與 PlayStation Store 最新特惠售價...</p>
         </div>
       </div>
 
-      <!-- 跨平台搜尋框 -->
+      <!-- 雙平台聯合搜尋框 -->
       <div class="flex-1 max-w-md w-full">
         <form id="searchForm" class="relative flex items-center">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-sm"></i>
           <input
             id="searchInput"
             type="text"
-            placeholder="搜全平台（例：暗黑破壞神、艾爾登法環、惡靈古堡、Cyberpunk）..."
+            placeholder="搜雙平台（例：沉默之丘、惡靈古堡、戰神、艾爾登）..."
             class="w-full pl-9 pr-24 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
           />
           <button
             type="submit"
             class="absolute right-1.5 px-3 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition"
           >
-            全平台搜
+            雙平台搜
           </button>
         </form>
       </div>
 
-      <!-- 工具按鈕 -->
+      <!-- 操作按鈕 -->
       <div class="flex items-center gap-2">
         <button
           onclick="loadAllData(true)"
@@ -96,30 +93,26 @@
     </div>
   </header>
 
-  <!-- 平台與史低篩選列 -->
+  <!-- 篩選列 (僅保留 Steam 與 PlayStation) -->
   <section class="bg-slate-900/70 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <!-- 三大平台分頁 -->
+        <!-- 平台分頁切換 -->
         <div class="flex flex-wrap items-center gap-2" id="platformTabs">
           <button onclick="setPlatformFilter('all')" data-plat="all" class="plat-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-sky-500 text-slate-950 transition flex items-center gap-1.5">
-            <span>🔥 全部跨平台 (<span id="countAll">0</span>)</span>
+            <span>🔥 全部雙平台 (<span id="countAll">0</span>)</span>
           </button>
           <button onclick="setPlatformFilter('steam')" data-plat="steam" class="plat-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
             <i class="fa-brands fa-steam text-[#66c0f4]"></i>
             <span>Steam 專區 (<span id="countSteam">0</span>)</span>
           </button>
-          <button onclick="setPlatformFilter('epic')" data-plat="epic" class="plat-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-bolt text-amber-400"></i>
-            <span>Epic Games 專區 (<span id="countEpic">0</span>)</span>
-          </button>
-          <button onclick="setPlatformFilter('blizzard')" data-plat="blizzard" class="plat-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
-            <i class="fa-brands fa-battle-net text-cyan-400"></i>
-            <span>暴雪 Battle.net (<span id="countBlizzard">0</span>)</span>
+          <button onclick="setPlatformFilter('psn')" data-plat="psn" class="plat-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-brands fa-playstation text-sky-400"></i>
+            <span>PlayStation 專區 (<span id="countPsn">0</span>)</span>
           </button>
         </div>
 
-        <!-- 史低快速篩選、預算與排序 -->
+        <!-- 史低篩選、預算與排序 -->
         <div class="flex flex-wrap items-center gap-3 text-xs">
           <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 cursor-pointer text-rose-300 font-semibold">
             <input type="checkbox" id="onlyHistoricalLowToggle" onchange="renderGames()" class="rounded accent-rose-500" />
@@ -163,13 +156,25 @@
 
   <!-- 主內容區 -->
   <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-    <div id="searchBanner" class="hidden mb-4 p-3 rounded-xl bg-slate-800 border border-sky-500/40 flex items-center justify-between">
+    <div id="searchBanner" class="hidden mb-4 p-3 rounded-xl bg-slate-800 border border-sky-500/40 flex flex-wrap items-center justify-between gap-3">
       <div class="text-sm">
-        🔍 三大平台搜尋「<span id="searchKeywordText" class="font-bold text-sky-400"></span>」的即時結果：
+        🔍 雙平台搜尋「<span id="searchKeywordText" class="font-bold text-sky-400"></span>」的官方結果：
       </div>
-      <button onclick="clearSearch()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">
-        返回首頁清單
-      </button>
+      <div class="flex items-center gap-2">
+        <a
+          id="searchPsnDealsDirect"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs px-2.5 py-1 rounded-lg bg-[#003791] hover:bg-[#00296b] text-white font-medium flex items-center gap-1 transition"
+        >
+          <i class="fa-brands fa-playstation text-xs"></i>
+          <span>在 PS Deals 台灣區深查全版本史低</span>
+        </a>
+        <button onclick="clearSearch()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">
+          返回首頁
+        </button>
+      </div>
     </div>
 
     <!-- 載入中骨架屏 -->
@@ -187,10 +192,9 @@
     <div id="emptyState" class="hidden text-center py-16">
       <div class="flex justify-center gap-3 text-4xl text-slate-600 mb-3">
         <i class="fa-brands fa-steam"></i>
-        <i class="fa-solid fa-bolt"></i>
-        <i class="fa-brands fa-battle-net"></i>
+        <i class="fa-brands fa-playstation"></i>
       </div>
-      <p class="text-slate-300 font-medium">找不到符合篩選條件的遊戲</p>
+      <p class="text-slate-300 font-medium">找不到符合條件的遊戲</p>
       <p class="text-xs text-slate-500 mt-1">請嘗試取消「只看新史低 / 平史低」、放寬預算上限或切換平台分頁</p>
     </div>
   </main>
@@ -202,14 +206,14 @@
       <div class="flex items-center justify-between pb-4 border-b border-slate-800">
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-bell text-amber-400"></i>
-          <h2 class="font-bold text-base">跨平台目標價追蹤清單</h2>
+          <h2 class="font-bold text-base">雙平台目標價追蹤清單</h2>
         </div>
         <button onclick="toggleWishlistDrawer()" class="text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
       <p class="text-xs text-slate-400 mt-2 mb-4">
-        設定您的理想入手價（TWD），自動比對 Steam、Epic Games 與暴雪最新價格！
+        設定您的理想入手價（TWD），自動比對 Steam 與 PS Store 最新價格！
       </p>
       <div id="wishlistContainer" class="flex-1 overflow-y-auto space-y-3"></div>
     </div>
@@ -217,11 +221,10 @@
 
   <!-- 頁尾說明 -->
   <footer class="border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
-    資料來源：Steam (`cc=tw`)・Epic Games (`TW`)・暴雪 Battle.net (`zh-tw`) ｜ 幣別：新台幣 (TWD)
+    資料來源：Steam (`cc=tw`) 官方 Storefront API ＆ Sony PlayStation Store (`zh-hant-tw`) 官方商品直連 ｜ 幣別：新台幣 (TWD)
   </footer>
 
   <script>
-    // 台灣 Steam 熱門大作清單與經過驗證的台灣區真實歷史最低價 (TWD)
     const CURATED_STEAM_GAMES = [
       { appid: 1245620, title: '艾爾登法環 (Elden Ring)', historicalLow: 1253 },
       { appid: 2358720, title: '黑神話：悟空 (Black Myth: Wukong)', historicalLow: 1280 },
@@ -243,7 +246,7 @@
 
     let allGames = [];
     let searchResults = null;
-    let currentPlatform = 'all'; // 'all' | 'steam' | 'epic' | 'blizzard'
+    let currentPlatform = 'all';
     let wishlist = JSON.parse(localStorage.getItem('gamedeal_wishlist') || '{}');
 
     function formatUnixDate(unixSec) {
@@ -274,16 +277,13 @@
         }
       }
 
-      if (finalPrice === 0) {
-        return { historicalLow: 0, lowStatus: 'new_low', lowLabel: '🔥 限免新史低 ($0)' };
-      }
       if (discount > 0 && finalPrice < histLow) {
         return { historicalLow: finalPrice, lowStatus: 'new_low', lowLabel: '🔥 新史低 (破紀錄)' };
       }
-      if (discount > 0 && (finalPrice === histLow || (discount >= 65 && finalPrice <= histLow * 1.05))) {
+      if (discount > 0 && (finalPrice === histLow || (discount >= 60 && finalPrice <= histLow * 1.05))) {
         return { historicalLow: Math.min(histLow, finalPrice), lowStatus: 'match_low', lowLabel: '⚡ 平史低 (最低價)' };
       }
-      if (discount > 0 && finalPrice - histLow <= Math.max(100, histLow * 0.15)) {
+      if (discount > 0 && finalPrice - histLow <= Math.max(120, histLow * 0.2)) {
         return { historicalLow: histLow, lowStatus: 'near_low', lowLabel: `📉 近史低 (差 NT$${finalPrice - histLow})` };
       }
       return {
@@ -307,7 +307,7 @@
       return null;
     }
 
-    async function callMultiPlatformAPI(params) {
+    async function callPsnAPI(params) {
       const queryStr = new URLSearchParams(params).toString();
       if (window.location.protocol.startsWith('http')) {
         try {
@@ -333,10 +333,10 @@
       try {
         const steamAppids = CURATED_STEAM_GAMES.map(g => g.appid).join(',');
 
-        const [steamFeatured, steamPrices, multiData] = await Promise.all([
+        const [steamFeatured, steamPrices, psnData] = await Promise.all([
           callSteamAPI({ type: 'featured' }),
           callSteamAPI({ type: 'price_batch', appids: steamAppids }),
-          callMultiPlatformAPI({})
+          callPsnAPI({})
         ]);
 
         const mergedMap = new Map();
@@ -436,33 +436,26 @@
           }
         }
 
-        // 3. 解析 Epic Games 與 暴雪 Battle.net
-        const ingestOtherPlatforms = (items, extraBtnText) => {
-          if (!Array.isArray(items)) return;
-          for (const g of items) {
+        // 3. 解析 PlayStation Store 台灣區官方特惠
+        if (psnData && Array.isArray(psnData.psn)) {
+          for (const g of psnData.psn) {
             const lowInfo = evaluateHistoricalLow(g.finalPrice, g.originalPrice, g.discount, g.historicalLow);
-            mergedMap.set(`${g.platform}_${g.id}`, {
+            mergedMap.set(`psn_${g.id}`, {
               ...g,
-              extraText: extraBtnText,
+              extraText: 'PS Deals 台灣史低',
               ...lowInfo
             });
           }
-        };
-
-        if (multiData) {
-          ingestOtherPlatforms(multiData.epic, 'ITAD 跨網史低');
-          ingestOtherPlatforms(multiData.blizzard, '暴雪商店詳情');
         }
 
         allGames = Array.from(mergedMap.values());
         updateTabCounts(allGames);
 
         const cSteam = allGames.filter(g => g.platform === 'steam').length;
-        const cEpic = allGames.filter(g => g.platform === 'epic').length;
-        const cBlizz = allGames.filter(g => g.platform === 'blizzard').length;
+        const cPsn = allGames.filter(g => g.platform === 'psn').length;
 
         document.getElementById('connectionStatus').innerHTML =
-          `✅ 台灣區連線成功：Steam (${cSteam} 款)・Epic Games (${cEpic} 款)・暴雪 (${cBlizz} 款)`;
+          `✅ 台灣區雙平台連線成功：Steam (${cSteam} 款)・PS Store (${cPsn} 款)`;
 
         syncWishlistPrices();
         renderGames();
@@ -475,7 +468,7 @@
       }
     }
 
-    // 三大平台聯合搜尋
+    // 雙平台搜尋
     document.getElementById('searchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const term = document.getElementById('searchInput').value.trim();
@@ -490,9 +483,9 @@
       gridEl.classList.add('hidden');
 
       try {
-        const [steamSearchData, multiSearchData] = await Promise.all([
+        const [steamSearchData, psnSearchData] = await Promise.all([
           callSteamAPI({ type: 'search', term }),
-          callMultiPlatformAPI({ term })
+          callPsnAPI({ term })
         ]);
 
         const steamResults = ((steamSearchData && steamSearchData.items) ? steamSearchData.items : [])
@@ -520,18 +513,17 @@
             };
           });
 
-        const mapOtherSearch = (arr, extraText) => (arr || []).map(g => ({
+        const psnRes = ((psnSearchData && psnSearchData.psn) ? psnSearchData.psn : []).map(g => ({
           ...g,
-          extraText,
+          extraText: 'PS Deals 台灣史低',
           ...evaluateHistoricalLow(g.finalPrice, g.originalPrice, g.discount, g.historicalLow)
         }));
 
-        const epicRes = mapOtherSearch(multiSearchData?.epic, 'ITAD 跨網史低');
-        const blizzRes = mapOtherSearch(multiSearchData?.blizzard, '暴雪商店詳情');
-
-        searchResults = [...epicRes, ...blizzRes, ...steamResults];
+        searchResults = [...psnRes, ...steamResults];
         updateTabCounts(searchResults);
+
         document.getElementById('searchKeywordText').textContent = term;
+        document.getElementById('searchPsnDealsDirect').href = `https://psdeals.net/tw-store/search?search_query=${encodeURIComponent(term)}`;
         document.getElementById('searchBanner').classList.remove('hidden');
         renderGames();
       } catch (err) {
@@ -544,8 +536,7 @@
     function updateTabCounts(sourceList) {
       document.getElementById('countAll').textContent = sourceList.length;
       document.getElementById('countSteam').textContent = sourceList.filter(g => g.platform === 'steam').length;
-      document.getElementById('countEpic').textContent = sourceList.filter(g => g.platform === 'epic').length;
-      document.getElementById('countBlizzard').textContent = sourceList.filter(g => g.platform === 'blizzard').length;
+      document.getElementById('countPsn').textContent = sourceList.filter(g => g.platform === 'psn').length;
     }
 
     function clearSearch() {
@@ -625,26 +616,15 @@
         const wished = wishlist[uniqueKey];
         const targetReached = wished && game.finalPrice <= wished.targetPrice;
 
-        const platConfig = {
-          steam: {
-            cardBg: 'bg-[#172437] border-slate-700/80',
-            badge: `<span class="px-2 py-0.5 rounded bg-[#1b2838] text-[#66c0f4] border border-[#66c0f4]/40 font-bold flex items-center gap-1"><i class="fa-brands fa-steam"></i> ${game.deviceText}</span>`,
-            btnClass: 'bg-[#66c0f4] hover:bg-[#4192c1] text-slate-950',
-            btnName: '前往 Steam'
-          },
-          epic: {
-            cardBg: 'bg-[#18181b] border-neutral-700/80',
-            badge: `<span class="px-2 py-0.5 rounded bg-neutral-800 text-amber-300 border border-amber-400/40 font-bold flex items-center gap-1"><i class="fa-solid fa-bolt"></i> ${game.deviceText}</span>`,
-            btnClass: 'bg-amber-400 hover:bg-amber-300 text-slate-950',
-            btnName: '前往 Epic'
-          },
-          blizzard: {
-            cardBg: 'bg-[#0c233c] border-cyan-800/70',
-            badge: `<span class="px-2 py-0.5 rounded bg-[#0074e0]/30 text-cyan-300 border border-cyan-400/40 font-bold flex items-center gap-1"><i class="fa-brands fa-battle-net"></i> ${game.deviceText}</span>`,
-            btnClass: 'bg-[#0074e0] hover:bg-[#005bb5] text-white',
-            btnName: '前往暴雪商店'
-          }
-        }[game.platform];
+        const isSteam = game.platform === 'steam';
+        const cardBg = isSteam ? 'bg-[#172437] border-slate-700/80' : 'bg-[#0f1f38] border-sky-900/70';
+        const platBadge = isSteam
+          ? `<span class="px-2 py-0.5 rounded bg-[#1b2838] text-[#66c0f4] border border-[#66c0f4]/40 font-bold flex items-center gap-1"><i class="fa-brands fa-steam"></i> ${game.deviceText}</span>`
+          : `<span class="px-2 py-0.5 rounded bg-[#003791] text-sky-200 border border-sky-400/40 font-bold flex items-center gap-1"><i class="fa-brands fa-playstation"></i> ${game.deviceText}</span>`;
+        const btnClass = isSteam
+          ? 'bg-[#66c0f4] hover:bg-[#4192c1] text-slate-950'
+          : 'bg-[#0070d1] hover:bg-[#005bb5] text-white';
+        const btnName = isSteam ? '前往 Steam' : '直達 PS Store 購買';
 
         let lowBadgeHtml = '';
         if (game.lowStatus === 'new_low') {
@@ -671,25 +651,41 @@
           </div>
         `;
 
+        const imageRenderHtml = isSteam ? `
+          <img
+            src="${game.image}"
+            alt="${game.title}"
+            loading="lazy"
+            class="w-full h-full object-cover"
+          />
+        ` : `
+          <img
+            src="${game.image}"
+            alt=""
+            loading="lazy"
+            class="absolute inset-0 w-full h-full object-cover blur-md opacity-40 scale-110"
+          />
+          <img
+            src="${game.image}"
+            alt="${game.title}"
+            loading="lazy"
+            class="relative z-10 w-full h-full object-contain py-1"
+          />
+        `;
+
         return `
-          <div class="game-card rounded-2xl ${platConfig.cardBg} border shadow-lg overflow-hidden flex flex-col justify-between">
+          <div class="game-card rounded-2xl ${cardBg} border shadow-lg overflow-hidden flex flex-col justify-between">
             <div>
               <div class="relative aspect-[460/215] bg-slate-950 overflow-hidden">
-                <img
-                  src="${game.image}"
-                  alt="${game.title}"
-                  loading="lazy"
-                  onerror="this.src='https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg'"
-                  class="w-full h-full object-cover"
-                />
+                ${imageRenderHtml}
                 ${game.discount > 0 ? `
-                  <div class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-[#4c6b22] text-[#a4d007] font-black text-sm shadow">
+                  <div class="absolute z-20 top-2.5 left-2.5 px-2.5 py-1 rounded-lg ${isSteam ? 'bg-[#4c6b22] text-[#a4d007]' : 'bg-rose-600 text-white'} font-black text-sm shadow">
                     -${game.discount}%
                   </div>
                 ` : ''}
                 <button
                   onclick="promptWishlist('${uniqueKey}', '${game.title.replace(/'/g, "\\'")}', ${game.finalPrice}, '${game.storeUrl}', '${game.platform}')"
-                  class="absolute top-2.5 right-2.5 w-8 h-8 rounded-lg ${wished ? 'bg-amber-500 text-slate-950' : 'bg-slate-900/85 text-slate-300 hover:text-white'} flex items-center justify-center transition shadow"
+                  class="absolute z-20 top-2.5 right-2.5 w-8 h-8 rounded-lg ${wished ? 'bg-amber-500 text-slate-950' : 'bg-slate-900/85 text-slate-300 hover:text-white'} flex items-center justify-center transition shadow"
                   title="設定目標入手價"
                 >
                   <i class="fa-solid fa-bell text-xs"></i>
@@ -698,7 +694,7 @@
 
               <div class="p-4 pb-2">
                 <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] mb-2">
-                  ${platConfig.badge}
+                  ${platBadge}
                   ${lowBadgeHtml}
                 </div>
                 <h3 class="font-bold text-white text-sm line-clamp-2 min-h-[40px]" title="${game.title}">
@@ -720,8 +716,8 @@
                   <span class="text-xs text-slate-400">台灣官方現價</span>
                   <div class="text-right">
                     ${game.discount > 0 ? `<span class="text-xs text-slate-400 line-through mr-1.5">NT$ ${game.originalPrice.toLocaleString()}</span>` : ''}
-                    <span class="text-lg font-black ${game.finalPrice === 0 ? 'text-rose-400' : (game.discount > 0 ? 'text-[#a4d007]' : 'text-white')}">
-                      ${game.finalPrice === 0 ? '限時免費 $0' : `NT$ ${game.finalPrice.toLocaleString()}`}
+                    <span class="text-lg font-black ${game.discount > 0 ? (isSteam ? 'text-[#a4d007]' : 'text-amber-400') : 'text-white'}">
+                      NT$ ${game.finalPrice.toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -732,9 +728,9 @@
                   href="${game.storeUrl}"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="py-2 rounded-xl ${platConfig.btnClass} font-bold text-xs text-center transition"
+                  class="py-2 rounded-xl ${btnClass} font-bold text-xs text-center transition"
                 >
-                  ${platConfig.btnName}
+                  ${btnName}
                 </a>
                 <a
                   href="${game.extraUrl}"
@@ -794,17 +790,24 @@
       container.innerHTML = keys.map(key => {
         const item = wishlist[key];
         const reached = item.currentPrice <= item.targetPrice;
+        const isSteam = item.platform === 'steam';
+
         return `
           <div class="p-3 rounded-xl bg-slate-800/90 border ${reached ? 'border-emerald-500/50' : 'border-slate-700'} flex items-center justify-between gap-3">
             <div class="min-w-0 flex-1">
-              <div class="text-xs font-bold text-white truncate">${item.title}</div>
-              <div class="text-[11px] text-slate-400 mt-1">
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="text-[10px] px-1.5 py-0.2 rounded font-bold ${isSteam ? 'bg-[#1b2838] text-[#66c0f4]' : 'bg-[#003791] text-sky-200'}">
+                  ${isSteam ? 'Steam' : 'PlayStation'}
+                </span>
+                <span class="text-xs font-bold text-white truncate">${item.title}</span>
+              </div>
+              <div class="text-[11px] text-slate-400">
                 現價: <span class="text-white font-semibold">NT$ ${item.currentPrice}</span> ｜ 目標價: <span class="text-amber-300 font-semibold">NT$ ${item.targetPrice}</span>
               </div>
               ${reached ? `<div class="text-[11px] text-emerald-400 font-bold mt-1">🎉 已達目標入手價！</div>` : ''}
             </div>
             <div class="flex items-center gap-1.5">
-              <a href="${item.storeUrl || '#'}" target="_blank" class="px-2.5 py-1 rounded bg-sky-500 text-slate-950 font-bold text-xs">購買</a>
+              <a href="${item.storeUrl || '#'}" target="_blank" class="px-2.5 py-1 rounded ${isSteam ? 'bg-[#66c0f4] text-slate-950' : 'bg-[#0070d1] text-white'} font-bold text-xs">購買</a>
               <button onclick="removeWishlistItem('${key}')" class="p-1.5 text-slate-400 hover:text-rose-400">
                 <i class="fa-solid fa-trash-can text-xs"></i>
               </button>

@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      <!-- 搜尋框 (支援繁體中文與英文直接搜尋 Steam) -->
+      <!-- 搜尋框 -->
       <div class="flex-1 max-w-md w-full">
         <form id="searchForm" class="relative flex items-center">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-sm"></i>
@@ -104,7 +104,6 @@
   <!-- 篩選與分類控制列 -->
   <section class="bg-slate-900/50 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-      <!-- 分頁切換 -->
       <div class="flex flex-wrap items-center gap-2" id="categoryTabs">
         <button onclick="switchTab('all')" data-tab="all" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#66c0f4] text-slate-950 transition">
           🔥 全部即時清單
@@ -120,7 +119,6 @@
         </button>
       </div>
 
-      <!-- 折扣與預算篩選 -->
       <div class="flex flex-wrap items-center gap-3 text-xs">
         <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
           <input type="checkbox" id="onlyDiscountToggle" onchange="renderGames()" class="rounded accent-[#66c0f4]" />
@@ -157,7 +155,6 @@
 
   <!-- 主內容區 -->
   <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-    <!-- 搜尋結果提示列 -->
     <div id="searchBanner" class="hidden mb-4 p-3 rounded-xl bg-[#1b2838] border border-[#66c0f4]/40 flex items-center justify-between">
       <div class="text-sm">
         🔍 Steam 台灣商店搜尋「<span id="searchKeywordText" class="font-bold text-[#66c0f4]"></span>」的即時結果：
@@ -186,7 +183,7 @@
     </div>
   </main>
 
-  <!-- 願望清單與目標價側邊抽屜 -->
+  <!-- 願望清單抽屜 -->
   <div id="wishlistDrawer" class="fixed inset-0 z-50 hidden">
     <div onclick="toggleWishlistDrawer()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 border-l border-slate-800 p-5 flex flex-col">
@@ -208,11 +205,10 @@
 
   <!-- 頁尾說明 -->
   <footer class="border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
-    資料來源：Valve Steam 官方 Storefront API (`cc=tw`, `currency=TWD`) ｜ 點擊卡片可直通 Steam 台灣官方商店或開啟 SteamDB 查詢歷史最低價紀錄
+    資料來源：Valve Steam 官方 Storefront API (`cc=tw`, `currency=TWD`) ｜ 支援遊戲、組合包與套件即時售價
   </footer>
 
   <script>
-    // 台灣玩家最常關注的熱門大作清單 (僅保留 AppID 與繁中名稱，價格 100% 由 Steam API 即時填入)
     const CURATED_AAA_GAMES = [
       { appid: 1245620, title: '艾爾登法環 (Elden Ring)' },
       { appid: 2358720, title: '黑神話：悟空 (Black Myth: Wukong)' },
@@ -226,8 +222,7 @@
       { appid: 1426210, title: '雙人成行 (It Takes Two)' },
       { appid: 1623730, title: '幻獸帕魯 (Palworld)' },
       { appid: 292030,  title: '巫師 3：狂獵 (The Witcher 3: Wild Hunt)' },
-      { appid: 1174180, title: '碧血狂殺 2 (Red Dead Redemption 2)' },
-      { appid: 1097150, title: '糖豆人 / 死亡擱淺等熱門精選' }
+      { appid: 1174180, title: '碧血狂殺 2 (Red Dead Redemption 2)' }
     ];
 
     let allGames = [];
@@ -235,11 +230,9 @@
     let currentTab = 'all';
     let wishlist = JSON.parse(localStorage.getItem('steamtw_wishlist') || '{}');
 
-    // 智慧型 API 請求器：優先使用 Vercel Serverless (/api/steam)，若在本機預覽則自動切換為公開 CORS 代理
     async function callSteamAPI(params) {
       const queryStr = new URLSearchParams(params).toString();
 
-      // 1. 嘗試呼叫 Vercel Serverless Function (/api/steam)
       if (window.location.protocol.startsWith('http')) {
         try {
           const res = await fetch(`/api/steam?${queryStr}`);
@@ -249,12 +242,9 @@
               '✅ 已透過 Vercel 後端連線至 Steam 台灣官方伺服器 (TWD 即時報價)';
             return await res.json();
           }
-        } catch (e) {
-          // 若非部署於 Vercel 環境則自動進入下方 Fallback
-        }
+        } catch (e) {}
       }
 
-      // 2. 本機直接開啟預覽時的自動備援 (透過公開 CORS 代理直連 Steam 台灣區 API)
       let rawSteamUrl = '';
       if (params.type === 'featured') {
         rawSteamUrl = 'https://store.steampowered.com/api/featuredcategories?cc=tw&l=tchinese';
@@ -277,14 +267,11 @@
               '⚡ 本機預覽模式：已透過代理直連 Steam 台灣官方 API (部署至 Vercel 後將啟用高速專線)';
             return await res.json();
           }
-        } catch (err) {
-          console.warn('Proxy 嘗試失敗，切換下一個:', err);
-        }
+        } catch (err) {}
       }
       throw new Error('無法連線至 Steam API，請確認網路狀態');
     }
 
-    // 初始化載入：同步取得「Steam 今日特惠/熱銷」與「熱門大作台灣區即時價格」
     async function loadInitialData(forceRefresh = false) {
       const loadingEl = document.getElementById('loadingState');
       const gridEl = document.getElementById('gamesGrid');
@@ -304,16 +291,19 @@
 
         const gameMap = new Map();
 
-        // 1. 解析熱門大作即時價格 (Steam price_overview 單位為「分」，需除以 100)
+        // 1. 解析熱門大作
         if (batchPriceData) {
           for (const item of CURATED_AAA_GAMES) {
             const entry = batchPriceData[item.appid];
             if (entry && entry.success && entry.data && entry.data.price_overview) {
               const p = entry.data.price_overview;
-              gameMap.set(item.appid, {
-                appid: item.appid,
+              gameMap.set(`app_${item.appid}`, {
+                id: item.appid,
+                itemType: 'app',
                 title: item.title,
                 image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.appid}/header.jpg`,
+                storeUrl: `https://store.steampowered.com/app/${item.appid}/`,
+                steamDbUrl: `https://steamdb.info/app/${item.appid}/`,
                 originalPrice: Math.round(p.initial / 100),
                 finalPrice: Math.round(p.final / 100),
                 discount: p.discount_percent || 0,
@@ -324,26 +314,49 @@
           }
         }
 
-        // 2. 解析 Steam 台灣區今日特惠 (specials) 與熱銷商品 (top_sellers)
+        // 2. 解析特惠與熱銷榜 (精準區分 app、bundle、package)
         const parseCategoryList = (items, categoryTag) => {
           if (!Array.isArray(items)) return;
           for (const item of items) {
             if (!item.id || item.final_price === undefined) continue;
-            // 排除無價格的組合包或非標準 App
             const orig = Math.round((item.original_price || item.final_price) / 100);
             const fin = Math.round(item.final_price / 100);
             if (orig === 0 && fin === 0) continue;
 
-            if (gameMap.has(item.id)) {
-              const existing = gameMap.get(item.id);
+            // 判斷類型與正確商店連結
+            let itemType = 'app';
+            let storeUrl = `https://store.steampowered.com/app/${item.id}/`;
+            let steamDbUrl = `https://steamdb.info/app/${item.id}/`;
+
+            const imgCandidate = item.large_capsule_image || item.header_image || item.small_capsule_image || '';
+
+            if (item.type === 1) {
+              itemType = 'sub';
+              storeUrl = `https://store.steampowered.com/sub/${item.id}/`;
+              steamDbUrl = `https://steamdb.info/sub/${item.id}/`;
+            } else if (imgCandidate.includes('/bundles/') || item.type === 2) {
+              itemType = 'bundle';
+              storeUrl = `https://store.steampowered.com/bundle/${item.id}/`;
+              steamDbUrl = `https://steamdb.info/bundle/${item.id}/`;
+            }
+
+            // 優先採用 Steam 回傳的官方圖片網址，避免 ID 碰撞導致錯圖
+            const officialImage = imgCandidate || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`;
+            const mapKey = `${itemType}_${item.id}`;
+
+            if (gameMap.has(mapKey)) {
+              const existing = gameMap.get(mapKey);
               if (!existing.categories.includes(categoryTag)) {
                 existing.categories.push(categoryTag);
               }
             } else {
-              gameMap.set(item.id, {
-                appid: item.id,
+              gameMap.set(mapKey, {
+                id: item.id,
+                itemType: itemType,
                 title: item.name,
-                image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
+                image: officialImage,
+                storeUrl: storeUrl,
+                steamDbUrl: steamDbUrl,
                 originalPrice: orig,
                 finalPrice: fin,
                 discount: item.discount_percent || 0,
@@ -371,7 +384,7 @@
       }
     }
 
-    // 搜尋台灣 Steam 商店
+    // 搜尋功能
     document.getElementById('searchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const term = document.getElementById('searchInput').value.trim();
@@ -396,9 +409,14 @@
             const fin = Math.round(item.price.final / 100);
             const disc = orig > fin ? Math.round((1 - fin / orig) * 100) : 0;
             return {
-              appid: item.id,
+              id: item.id,
+              itemType: 'app',
               title: item.name,
-              image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
+              image: item.tiny_image
+                ? item.tiny_image.replace('capsule_sm_120.jpg', 'header.jpg')
+                : `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
+              storeUrl: `https://store.steampowered.com/app/${item.id}/`,
+              steamDbUrl: `https://steamdb.info/app/${item.id}/`,
               originalPrice: orig,
               finalPrice: fin,
               discount: disc,
@@ -442,7 +460,6 @@
       renderGames();
     }
 
-    // 渲染遊戲卡片
     function renderGames() {
       const gridEl = document.getElementById('gamesGrid');
       const emptyEl = document.getElementById('emptyState');
@@ -478,8 +495,11 @@
       gridEl.classList.remove('hidden');
 
       gridEl.innerHTML = list.map(game => {
-        const wished = wishlist[game.appid];
+        const uniqueKey = `${game.itemType}_${game.id}`;
+        const wished = wishlist[uniqueKey];
         const targetReached = wished && game.finalPrice <= wished.targetPrice;
+
+        const typeLabel = game.itemType === 'bundle' ? '組合包' : (game.itemType === 'sub' ? '套件' : '遊戲');
 
         return `
           <div class="game-card rounded-2xl bg-[#1b2838] border border-slate-700/80 overflow-hidden flex flex-col justify-between">
@@ -488,7 +508,8 @@
                 <img
                   src="${game.image}"
                   alt="${game.title}"
-                  onerror="this.src='https://placehold.co/460x215/1b2838/66c0f4?text=Steam+App+${game.appid}'"
+                  loading="lazy"
+                  onerror="this.src='https://placehold.co/460x215/1b2838/66c0f4?text=Steam+${game.itemType.toUpperCase()}+${game.id}'"
                   class="w-full h-full object-cover"
                 />
                 ${game.discount > 0 ? `
@@ -497,7 +518,7 @@
                   </div>
                 ` : ''}
                 <button
-                  onclick="promptWishlist(${game.appid}, '${game.title.replace(/'/g, "\\'")}', ${game.finalPrice})"
+                  onclick="promptWishlist('${uniqueKey}', '${game.title.replace(/'/g, "\\'")}', ${game.finalPrice}, '${game.storeUrl}')"
                   class="absolute top-2.5 right-2.5 w-8 h-8 rounded-lg ${wished ? 'bg-amber-500 text-slate-950' : 'bg-slate-900/80 text-slate-300 hover:text-white'} flex items-center justify-center transition"
                   title="設定目標價提醒"
                 >
@@ -508,7 +529,8 @@
               <div class="p-4">
                 <div class="flex items-center gap-1.5 text-[11px] text-[#66c0f4] mb-1">
                   <i class="fa-brands fa-steam"></i>
-                  <span>AppID: ${game.appid}</span>
+                  <span class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">${typeLabel}</span>
+                  <span>ID: ${game.id}</span>
                   ${targetReached ? `<span class="ml-auto px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">🎉 已達目標價</span>` : ''}
                 </div>
                 <h3 class="font-bold text-white text-sm line-clamp-2 min-h-[40px]" title="${game.title}">
@@ -530,7 +552,7 @@
 
               <div class="grid grid-cols-2 gap-2">
                 <a
-                  href="https://store.steampowered.com/app/${game.appid}/"
+                  href="${game.storeUrl}"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="py-2 rounded-xl bg-[#66c0f4] hover:bg-[#4192c1] text-slate-950 font-bold text-xs text-center transition"
@@ -538,11 +560,11 @@
                   前往 Steam 商店
                 </a>
                 <a
-                  href="https://steamdb.info/app/${game.appid}/"
+                  href="${game.steamDbUrl}"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs text-center border border-slate-600 transition"
-                  title="查看 SteamDB 台灣區歷史最低價紀錄"
+                  title="查看 SteamDB 歷史最低價紀錄"
                 >
                   查 SteamDB 史低
                 </a>
@@ -553,23 +575,23 @@
       }).join('');
     }
 
-    // 願望清單與目標價管理
-    function promptWishlist(appid, title, currentPrice) {
-      const existing = wishlist[appid];
+    function promptWishlist(key, title, currentPrice, storeUrl) {
+      const existing = wishlist[key];
       const defaultTarget = existing ? existing.targetPrice : Math.max(50, Math.round(currentPrice * 0.8));
-      const input = prompt(`設定《${title}》的目標入手價 (NT$ 台幣)：\n(目前台灣 Steam 售價為 NT$ ${currentPrice}，留空或按取消可移除追蹤)`, defaultTarget);
+      const input = prompt(`設定《${title}》的目標入手價 (NT$ 台幣)：\n(目前台灣 Steam 售價為 NT$ ${currentPrice}，留空或取消可移除追蹤)`, defaultTarget);
 
       if (input === null) return;
       const targetPrice = parseInt(input, 10);
 
       if (isNaN(targetPrice) || targetPrice <= 0) {
-        delete wishlist[appid];
+        delete wishlist[key];
       } else {
-        wishlist[appid] = {
-          appid,
+        wishlist[key] = {
+          key,
           title,
           currentPrice,
-          targetPrice
+          targetPrice,
+          storeUrl
         };
       }
 
@@ -580,8 +602,9 @@
 
     function syncWishlistPrices() {
       for (const g of allGames) {
-        if (wishlist[g.appid]) {
-          wishlist[g.appid].currentPrice = g.finalPrice;
+        const k = `${g.itemType}_${g.id}`;
+        if (wishlist[k]) {
+          wishlist[k].currentPrice = g.finalPrice;
         }
       }
       localStorage.setItem('steamtw_wishlist', JSON.stringify(wishlist));
@@ -598,8 +621,8 @@
         return;
       }
 
-      container.innerHTML = keys.map(appid => {
-        const item = wishlist[appid];
+      container.innerHTML = keys.map(key => {
+        const item = wishlist[key];
         const reached = item.currentPrice <= item.targetPrice;
         return `
           <div class="p-3 rounded-xl bg-slate-800/90 border ${reached ? 'border-emerald-500/50' : 'border-slate-700'} flex items-center justify-between gap-3">
@@ -611,8 +634,8 @@
               ${reached ? `<div class="text-[11px] text-emerald-400 font-bold mt-1">🎉 已達目標入手價！</div>` : ''}
             </div>
             <div class="flex items-center gap-1.5">
-              <a href="https://store.steampowered.com/app/${item.appid}/" target="_blank" class="px-2.5 py-1 rounded bg-[#66c0f4] text-slate-950 font-bold text-xs">購買</a>
-              <button onclick="removeWishlistItem(${item.appid})" class="p-1.5 text-slate-400 hover:text-rose-400">
+              <a href="${item.storeUrl || '#'}" target="_blank" class="px-2.5 py-1 rounded bg-[#66c0f4] text-slate-950 font-bold text-xs">購買</a>
+              <button onclick="removeWishlistItem('${key}')" class="p-1.5 text-slate-400 hover:text-rose-400">
                 <i class="fa-solid fa-trash-can text-xs"></i>
               </button>
             </div>
@@ -621,8 +644,8 @@
       }).join('');
     }
 
-    function removeWishlistItem(appid) {
-      delete wishlist[appid];
+    function removeWishlistItem(key) {
+      delete wishlist[key];
       localStorage.setItem('steamtw_wishlist', JSON.stringify(wishlist));
       updateWishlistUI();
       renderGames();
@@ -634,7 +657,6 @@
       updateWishlistUI();
     }
 
-    // 啟動載入
     updateWishlistUI();
     loadInitialData();
   </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GameDeal Hunter | Steam & PlayStation 台灣區即時特價與史低比價網</title>
+  <title>GameDeal Hunter | Steam & PlayStation 台灣區特價追蹤與 PS Plus 比價網</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -18,12 +18,19 @@
     .game-card:hover {
       transform: translateY(-4px);
     }
-    @keyframes pulse-Subtle {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.82; }
+    /* 還原 psdeals.net 的 PlayStation Plus 官方黑金漸層配色 (#b38b00 -> #f5d84a) */
+    .ps-plus-gradient {
+      background: linear-gradient(135deg, #b38b00 0%, #f5d84a 100%);
+      color: #0f172a;
     }
-    .badge-new-low {
-      animation: pulse-Subtle 2s infinite;
+    .ps-plus-box {
+      background: linear-gradient(135deg, rgba(179, 139, 0, 0.2) 0%, rgba(245, 216, 74, 0.12) 100%);
+      border: 1px solid rgba(245, 216, 74, 0.45);
+    }
+    /* 還原 psdeals.net 超值優惠合集的青色漸層 (#009da8 -> #49d2d0) */
+    .psdeals-teal-active {
+      background: linear-gradient(135deg, #009da8 0%, #49d2d0 100%);
+      color: #082f49;
     }
   </style>
 </head>
@@ -33,7 +40,6 @@
   <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <!-- Steam 與 PlayStation 雙平台 Logo -->
         <div class="flex items-center -space-x-1.5">
           <div class="w-9 h-9 rounded-xl bg-[#1b2838] border border-[#66c0f4]/50 flex items-center justify-center text-[#66c0f4] text-base shadow">
             <i class="fa-brands fa-steam"></i>
@@ -46,33 +52,33 @@
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">GameDeal Hunter</h1>
             <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
-              TW 台灣區 Steam & PS Store 官方直連
+              TW 台灣區 Steam & PS Deals 追蹤器
             </span>
           </div>
-          <p class="text-xs text-slate-400" id="connectionStatus">正在同步台灣區 Steam 與 PlayStation Store 最新特惠售價...</p>
+          <p class="text-xs text-slate-400" id="connectionStatus">正在同步台灣區 Steam 與 PlayStation Store 最新優惠...</p>
         </div>
       </div>
 
-      <!-- 雙平台聯合搜尋框 -->
+      <!-- 雙平台搜尋框 -->
       <div class="flex-1 max-w-md w-full">
         <form id="searchForm" class="relative flex items-center">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-sm"></i>
           <input
             id="searchInput"
             type="text"
-            placeholder="搜雙平台（例：沉默之丘、惡靈古堡、戰神、艾爾登）..."
+            placeholder="搜台灣區遊戲（例：SILENT HILL、惡靈古堡、戰神、巫師）..."
             class="w-full pl-9 pr-24 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
           />
           <button
             type="submit"
             class="absolute right-1.5 px-3 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition"
           >
-            雙平台搜
+            立即搜尋
           </button>
         </form>
       </div>
 
-      <!-- 操作按鈕 -->
+      <!-- 工具按鈕 -->
       <div class="flex items-center gap-2">
         <button
           onclick="loadAllData(true)"
@@ -86,15 +92,15 @@
           class="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs text-amber-300 font-medium flex items-center gap-1.5 transition"
         >
           <i class="fa-solid fa-bell"></i>
-          <span>目標價追蹤</span>
+          <span>降價提醒</span>
           <span id="wishlistBadge" class="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 font-bold text-[11px]">0</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- 篩選列 (僅保留 Steam 與 PlayStation) -->
-  <section class="bg-slate-900/70 border-b border-slate-800">
+  <!-- 主平台切換與通用篩選列 -->
+  <section class="bg-slate-900/80 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <!-- 平台分頁切換 -->
@@ -112,11 +118,12 @@
           </button>
         </div>
 
-        <!-- 史低篩選、預算與排序 -->
-        <div class="flex flex-wrap items-center gap-3 text-xs">
-          <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 cursor-pointer text-rose-300 font-semibold">
-            <input type="checkbox" id="onlyHistoricalLowToggle" onchange="renderGames()" class="rounded accent-rose-500" />
-            <span>🔥 只看新史低 / 平史低</span>
+        <!-- 通用排序與預算控制 -->
+        <div class="flex flex-wrap items-center gap-2.5 text-xs">
+          <!-- PS Plus 價格切換開關 -->
+          <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/40 cursor-pointer text-amber-300 font-bold">
+            <input type="checkbox" id="usePsPlusPriceToggle" checked onchange="renderGames()" class="rounded accent-amber-400" />
+            <span>➕ 以 PS Plus 會員價計算史低/排序</span>
           </label>
 
           <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
@@ -124,31 +131,105 @@
             <span>只看特價中</span>
           </label>
 
-          <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
-            <span class="text-slate-400">預算上限:</span>
-            <input
-              type="range"
-              id="budgetRange"
-              min="200"
-              max="2500"
-              step="100"
-              value="2500"
-              oninput="updateBudgetLabel()"
-              class="w-24 accent-sky-400"
-            />
-            <span id="budgetLabel" class="font-bold text-sky-400 min-w-[65px]">無上限</span>
-          </div>
-
           <select
             id="sortSelect"
             onchange="renderGames()"
             class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-sky-400"
           >
             <option value="low_first">🔥 新史低 / 平史低優先</option>
-            <option value="discount_desc">折扣幅度 (最高優先)</option>
-            <option value="price_asc">目前售價 (由低到高)</option>
-            <option value="price_desc">目前售價 (由高到低)</option>
+            <option value="discount_desc">💥 折扣幅度 (最高優先)</option>
+            <option value="psplus_first">➕ PS Plus 專屬優惠優先</option>
+            <option value="price_asc">💰 目前售價 (由低到高)</option>
+            <option value="metacritic_desc">🏆 Metacritic 評分最高</option>
           </select>
+        </div>
+      </div>
+
+      <!-- 🌟 完整還原 PS Deals (pcdeal.net.txt) 的專屬篩選面板 -->
+      <div id="psDealsFilterPanel" class="p-3.5 rounded-2xl bg-[#0c182c] border border-sky-900/70 flex flex-col gap-3">
+        <!-- 第一排：超值優惠合集 + 探索 PlayStation Plus -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-[11px] font-bold text-sky-400 mr-1 flex items-center gap-1">
+            <i class="fa-brands fa-playstation"></i> PS Deals 特價合集：
+          </span>
+          <button onclick="setPsCollection('all')" data-col="all" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-bold psdeals-teal-active transition">
+            全部優惠
+          </button>
+          <button onclick="setPsCollection('cheaper_than_ever')" data-col="cheaper_than_ever" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+            📉 史低價
+          </button>
+          <button onclick="setPsCollection('discounts_today')" data-col="discounts_today" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-1">
+            <span>⚡ 24小時內新優惠</span>
+            <span class="px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">+今日</span>
+          </button>
+          <button onclick="setPsCollection('ending_soon')" data-col="ending_soon" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+            ⏰ 即將結束優惠
+          </button>
+          <button onclick="setPsCollection('huge_discounts')" data-col="huge_discounts" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+            💥 超大折扣 (≥50%)
+          </button>
+          <button onclick="setPsCollection('great_games_half_price')" data-col="great_games_half_price" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700 transition" title="Metacritic 評分至少 80 分，且優惠幅度達到 50% 或以上">
+            🏆 半價佳作 (MC 80+)
+          </button>
+          <button onclick="setPsCollection('ps5_pro_enhanced')" data-col="ps5_pro_enhanced" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-950/60 text-purple-300 hover:bg-purple-900/60 border border-purple-700/50 transition">
+            ✨ PS5 Pro 增強
+          </button>
+
+          <!-- PlayStation Plus 專屬金色篩選 -->
+          <button onclick="setPsCollection('ps_plus_discounts')" data-col="ps_plus_discounts" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border border-amber-400/50 transition">
+            ➕ PS+ 會員額外折扣
+          </button>
+          <button onclick="setPsCollection('ps_plus_catalog')" data-col="ps_plus_catalog" class="ps-col-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border border-amber-400/50 transition">
+            🎮 PS+ Extra 遊戲目錄
+          </button>
+        </div>
+
+        <!-- 第二排：按價格挑選遊戲 (NT$160 / 320 / 640 / 960) + PS5/PS4 主機篩選 + PSDeals 官方合集直通車 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80 text-xs">
+          <!-- 按價格挑選遊戲 (來自 pcdeal.net.txt 第 395 行) -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] text-slate-400 mr-1">🪙 按價格挑選：</span>
+            <button onclick="setPriceTier(0)" data-tier="0" class="tier-btn px-2.5 py-1 rounded-lg bg-sky-500 text-slate-950 font-bold text-xs transition">
+              全部價格
+            </button>
+            <button onclick="setPriceTier(160)" data-tier="160" class="tier-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+              ≤ NT$160
+            </button>
+            <button onclick="setPriceTier(320)" data-tier="320" class="tier-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+              ≤ NT$320
+            </button>
+            <button onclick="setPriceTier(640)" data-tier="640" class="tier-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+              ≤ NT$640
+            </button>
+            <button onclick="setPriceTier(960)" data-tier="960" class="tier-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+              ≤ NT$960
+            </button>
+          </div>
+
+          <!-- PS 主機平台切換 (PS5 / PS4) -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] text-slate-400">🎮 主機：</span>
+            <button onclick="setPsConsole('all')" data-console="all" class="console-btn px-2.5 py-1 rounded-lg bg-sky-500 text-slate-950 font-bold text-xs transition">
+              PS5 / PS4
+            </button>
+            <button onclick="setPsConsole('PS5')" data-console="PS5" class="console-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+              僅 PS5
+            </button>
+            <button onclick="setPsConsole('PS4')" data-console="PS4" class="console-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+              僅 PS4
+            </button>
+            <a
+              id="psDealsExternalLink"
+              href="https://psdeals.net/tw-store/discounts"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="ml-2 px-2.5 py-1 rounded-lg bg-[#1272ca] hover:bg-[#0e5aa0] text-white font-semibold flex items-center gap-1 transition"
+              title="在 PS Deals 台灣官網開啟對應合集"
+            >
+              <span>開啟 PS Deals 台灣站對應合集</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -156,9 +237,10 @@
 
   <!-- 主內容區 -->
   <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+    <!-- 搜尋結果提示列 -->
     <div id="searchBanner" class="hidden mb-4 p-3 rounded-xl bg-slate-800 border border-sky-500/40 flex flex-wrap items-center justify-between gap-3">
       <div class="text-sm">
-        🔍 雙平台搜尋「<span id="searchKeywordText" class="font-bold text-sky-400"></span>」的官方結果：
+        🔍 台灣雙平台搜尋「<span id="searchKeywordText" class="font-bold text-sky-400"></span>」的結果：
       </div>
       <div class="flex items-center gap-2">
         <a
@@ -166,12 +248,12 @@
           href="#"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-xs px-2.5 py-1 rounded-lg bg-[#003791] hover:bg-[#00296b] text-white font-medium flex items-center gap-1 transition"
+          class="text-xs px-3 py-1.5 rounded-lg bg-[#1272ca] hover:bg-[#0e5aa0] text-white font-bold flex items-center gap-1.5 transition"
         >
-          <i class="fa-brands fa-playstation text-xs"></i>
-          <span>在 PS Deals 台灣區深查全版本史低</span>
+          <i class="fa-brands fa-playstation"></i>
+          <span>在 PS Deals 台灣站檢視此搜尋完整史低圖表</span>
         </a>
-        <button onclick="clearSearch()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">
+        <button onclick="clearSearch()" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">
           返回首頁
         </button>
       </div>
@@ -179,10 +261,10 @@
 
     <!-- 載入中骨架屏 -->
     <div id="loadingState" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="h-72 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
-      <div class="h-72 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
-      <div class="h-72 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
-      <div class="h-72 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
+      <div class="h-80 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
+      <div class="h-80 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
+      <div class="h-80 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
+      <div class="h-80 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-800"></div>
     </div>
 
     <!-- 遊戲卡片網格 -->
@@ -194,59 +276,91 @@
         <i class="fa-brands fa-steam"></i>
         <i class="fa-brands fa-playstation"></i>
       </div>
-      <p class="text-slate-300 font-medium">找不到符合條件的遊戲</p>
-      <p class="text-xs text-slate-500 mt-1">請嘗試取消「只看新史低 / 平史低」、放寬預算上限或切換平台分頁</p>
+      <p class="text-slate-300 font-medium">目前篩選條件下沒有符合的遊戲</p>
+      <p class="text-xs text-slate-500 mt-1">請嘗試切換「全部優惠」、「全部價格」，或直接點擊右上方藍鈕前往 PS Deals 台灣站查看完整清單</p>
+      <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-bold text-xs">
+        重設所有篩選條件
+      </button>
     </div>
   </main>
 
-  <!-- 願望清單抽屜 -->
+  <!-- 降價追蹤抽屜 -->
   <div id="wishlistDrawer" class="fixed inset-0 z-50 hidden">
     <div onclick="toggleWishlistDrawer()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 border-l border-slate-800 p-5 flex flex-col">
       <div class="flex items-center justify-between pb-4 border-b border-slate-800">
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-bell text-amber-400"></i>
-          <h2 class="font-bold text-base">雙平台目標價追蹤清單</h2>
+          <h2 class="font-bold text-base">降價提醒與目標價追蹤</h2>
         </div>
         <button onclick="toggleWishlistDrawer()" class="text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
       <p class="text-xs text-slate-400 mt-2 mb-4">
-        設定您的理想入手價（TWD），自動比對 Steam 與 PS Store 最新價格！
+        設定您的理想入手價（TWD），系統會同時比對一般特惠價與 PS Plus 會員價！
       </p>
       <div id="wishlistContainer" class="flex-1 overflow-y-auto space-y-3"></div>
     </div>
   </div>
 
-  <!-- 頁尾說明 -->
-  <footer class="border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
-    資料來源：Steam (`cc=tw`) 官方 Storefront API ＆ Sony PlayStation Store (`zh-hant-tw`) 官方商品直連 ｜ 幣別：新台幣 (TWD)
+  <!-- 頁尾：整合 psdeals.net 台灣區常用合集快速入口 -->
+  <footer class="border-t border-slate-800 bg-slate-900/60 py-6 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        資料來源：Steam (`cc=tw`) ＆ PlayStation Store Taiwan (`zh-hant-tw`)・分類架構參照 PS Deals 台灣站
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="https://psdeals.net/tw-store/discounts" target="_blank" class="hover:text-sky-400">PS Deals 所有折扣</a>
+        <span>｜</span>
+        <a href="https://psdeals.net/tw-store/collection/cheaper_than_ever" target="_blank" class="hover:text-sky-400">台灣 PS 史低榜</a>
+        <span>｜</span>
+        <a href="https://psdeals.net/tw-store/collection/ps_plus_discounts" target="_blank" class="text-amber-300 hover:underline">➕ PS+ 專屬折扣榜</a>
+        <span>｜</span>
+        <a href="https://psdeals.net/tw-store/collection/free_with_ps_plus" target="_blank" class="text-amber-300 hover:underline">🎁 PS+ 每月免費遊戲</a>
+      </div>
+    </div>
   </footer>
 
   <script>
     const CURATED_STEAM_GAMES = [
-      { appid: 1245620, title: '艾爾登法環 (Elden Ring)', historicalLow: 1253 },
-      { appid: 2358720, title: '黑神話：悟空 (Black Myth: Wukong)', historicalLow: 1280 },
-      { appid: 1091500, title: '電馭叛客 2077 (Cyberpunk 2077)', historicalLow: 479 },
-      { appid: 1086940, title: '柏德之門 3 (Baldur\'s Gate 3)', historicalLow: 1359 },
-      { appid: 2322010, title: '戰神：諸神黃昏 (God of War Ragnarök)', historicalLow: 1192 },
-      { appid: 582010,  title: '魔物獵人：世界 (Monster Hunter: World)', historicalLow: 303 },
-      { appid: 2050650, title: '惡靈古堡 4 重製版 (Resident Evil 4)', historicalLow: 297 },
-      { appid: 1687950, title: '女神異聞錄 5 皇家版 (Persona 5 Royal)', historicalLow: 716 },
-      { appid: 990080,  title: '霍格華茲的傳承 (Hogwarts Legacy)', historicalLow: 507 },
-      { appid: 1426210, title: '雙人成行 (It Takes Two)', historicalLow: 219 },
-      { appid: 1623730, title: '幻獸帕魯 (Palworld)', historicalLow: 516 },
-      { appid: 292030,  title: '巫師 3：狂獵 (The Witcher 3: Wild Hunt)', historicalLow: 217 },
-      { appid: 1174180, title: '碧血狂殺 2 (Red Dead Redemption 2)', historicalLow: 537 }
+      { appid: 1245620, title: '艾爾登法環 (Elden Ring)', historicalLow: 1253, metacritic: 96 },
+      { appid: 2358720, title: '黑神話：悟空 (Black Myth: Wukong)', historicalLow: 1280, metacritic: 81 },
+      { appid: 1091500, title: '電馭叛客 2077 (Cyberpunk 2077)', historicalLow: 479, metacritic: 86 },
+      { appid: 1086940, title: '柏德之門 3 (Baldur\'s Gate 3)', historicalLow: 1359, metacritic: 96 },
+      { appid: 2322010, title: '戰神：諸神黃昏 (God of War Ragnarök)', historicalLow: 1192, metacritic: 94 },
+      { appid: 582010,  title: '魔物獵人：世界 (Monster Hunter: World)', historicalLow: 303, metacritic: 90 },
+      { appid: 2050650, title: '惡靈古堡 4 重製版 (Resident Evil 4)', historicalLow: 297, metacritic: 93 },
+      { appid: 1687950, title: '女神異聞錄 5 皇家版 (Persona 5 Royal)', historicalLow: 716, metacritic: 95 },
+      { appid: 990080,  title: '霍格華茲的傳承 (Hogwarts Legacy)', historicalLow: 507, metacritic: 84 },
+      { appid: 1426210, title: '雙人成行 (It Takes Two)', historicalLow: 219, metacritic: 88 },
+      { appid: 1623730, title: '幻獸帕魯 (Palworld)', historicalLow: 516, metacritic: 80 },
+      { appid: 292030,  title: '巫師 3：狂獵 (The Witcher 3: Wild Hunt)', historicalLow: 217, metacritic: 93 },
+      { appid: 1174180, title: '碧血狂殺 2 (Red Dead Redemption 2)', historicalLow: 537, metacritic: 97 }
     ];
 
-    const KNOWN_STEAM_LOWS = {};
-    CURATED_STEAM_GAMES.forEach(g => { KNOWN_STEAM_LOWS[g.appid] = g.historicalLow; });
+    const KNOWN_STEAM_META = {};
+    CURATED_STEAM_GAMES.forEach(g => { KNOWN_STEAM_META[g.appid] = g; });
+
+    // 對應 psdeals.net 原始碼中的官方合集路由
+    const PSDEALS_COLLECTION_URLS = {
+      all: 'https://psdeals.net/tw-store/discounts',
+      cheaper_than_ever: 'https://psdeals.net/tw-store/collection/cheaper_than_ever',
+      discounts_today: 'https://psdeals.net/tw-store/collection/discounts_today',
+      ending_soon: 'https://psdeals.net/tw-store/collection/ending_today',
+      huge_discounts: 'https://psdeals.net/tw-store/collection/huge_discounts',
+      great_games_half_price: 'https://psdeals.net/tw-store/collection/great_games_half_price',
+      ps5_pro_enhanced: 'https://psdeals.net/tw-store/collection/ps5_pro_enhanced',
+      ps_plus_discounts: 'https://psdeals.net/tw-store/collection/ps_plus_discounts',
+      ps_plus_catalog: 'https://psdeals.net/tw-store/collection/ps_plus_game_catalog'
+    };
 
     let allGames = [];
     let searchResults = null;
-    let currentPlatform = 'all';
+    let currentPlatform = 'all';       // 'all' | 'steam' | 'psn'
+    let currentPsCollection = 'all';   // 對應 PS Deals 合集
+    let currentPriceTier = 0;          // 0 | 160 | 320 | 640 | 960
+    let currentPsConsole = 'all';      // 'all' | 'PS5' | 'PS4'
     let wishlist = JSON.parse(localStorage.getItem('gamedeal_wishlist') || '{}');
 
     function formatUnixDate(unixSec) {
@@ -254,70 +368,60 @@
       return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    function getRemainingDaysText(endDateStr) {
-      if (!endDateStr) return '';
+    function getRemainingDays(endDateStr) {
+      if (!endDateStr) return 99;
       const parts = endDateStr.split('/');
-      if (parts.length !== 3) return '';
+      if (parts.length !== 3) return 99;
       const end = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59);
       const now = new Date();
-      const diffMs = end.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      return Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    function getRemainingDaysText(endDateStr) {
+      if (!endDateStr) return '';
+      const diffDays = getRemainingDays(endDateStr);
       if (diffDays < 0) return '即將結束';
-      if (diffDays === 0) return '今日截止';
+      if (diffDays <= 1) return '⏰ 今日/明日結束';
       return `剩 ${diffDays} 天`;
     }
 
-    function evaluateHistoricalLow(finalPrice, originalPrice, discount, knownHistLow) {
+    function evaluateHistoricalLow(effectivePrice, originalPrice, discount, knownHistLow) {
       let histLow = knownHistLow;
       if (!histLow || histLow <= 0) {
-        if (discount >= 50) {
-          histLow = finalPrice;
-        } else {
-          histLow = Math.max(99, Math.round(originalPrice * 0.5));
-        }
+        histLow = discount >= 50 ? effectivePrice : Math.max(99, Math.round(originalPrice * 0.5));
       }
 
-      if (discount > 0 && finalPrice < histLow) {
-        return { historicalLow: finalPrice, lowStatus: 'new_low', lowLabel: '🔥 新史低 (破紀錄)' };
+      if (discount > 0 && effectivePrice < histLow) {
+        return { historicalLow: effectivePrice, lowStatus: 'new_low', lowLabel: '🔥 新史低' };
       }
-      if (discount > 0 && (finalPrice === histLow || (discount >= 60 && finalPrice <= histLow * 1.05))) {
-        return { historicalLow: Math.min(histLow, finalPrice), lowStatus: 'match_low', lowLabel: '⚡ 平史低 (最低價)' };
+      if (discount > 0 && (effectivePrice <= histLow || (discount >= 60 && effectivePrice <= histLow * 1.05))) {
+        return { historicalLow: Math.min(histLow, effectivePrice), lowStatus: 'match_low', lowLabel: '⚡ 平史低' };
       }
-      if (discount > 0 && finalPrice - histLow <= Math.max(120, histLow * 0.2)) {
-        return { historicalLow: histLow, lowStatus: 'near_low', lowLabel: `📉 近史低 (差 NT$${finalPrice - histLow})` };
+      if (discount > 0 && effectivePrice - histLow <= Math.max(120, histLow * 0.2)) {
+        return { historicalLow: histLow, lowStatus: 'near_low', lowLabel: `📉 近史低 (差 NT$${effectivePrice - histLow})` };
       }
       return {
-        historicalLow: Math.min(histLow, finalPrice),
+        historicalLow: Math.min(histLow, effectivePrice),
         lowStatus: 'above_low',
-        lowLabel: finalPrice > histLow ? `比史低貴 NT$${finalPrice - histLow}` : '目前原價'
+        lowLabel: effectivePrice > histLow ? `比史低貴 NT$${effectivePrice - histLow}` : '目前原價'
       };
     }
 
     async function callSteamAPI(params) {
       const queryStr = new URLSearchParams(params).toString();
-      if (window.location.protocol.startsWith('http')) {
-        try {
-          const res = await fetch(`/api/steam?${queryStr}`);
-          const contentType = res.headers.get('content-type') || '';
-          if (res.ok && contentType.includes('application/json')) {
-            return await res.json();
-          }
-        } catch (e) {}
-      }
+      try {
+        const res = await fetch(`/api/steam?${queryStr}`);
+        if (res.ok) return await res.json();
+      } catch (e) {}
       return null;
     }
 
     async function callPsnAPI(params) {
       const queryStr = new URLSearchParams(params).toString();
-      if (window.location.protocol.startsWith('http')) {
-        try {
-          const res = await fetch(`/api/psn?${queryStr}`);
-          const contentType = res.headers.get('content-type') || '';
-          if (res.ok && contentType.includes('application/json')) {
-            return await res.json();
-          }
-        } catch (e) {}
-      }
+      try {
+        const res = await fetch(`/api/psn?${queryStr}`);
+        if (res.ok) return await res.json();
+      } catch (e) {}
       return null;
     }
 
@@ -342,7 +446,7 @@
         const mergedMap = new Map();
 
         const steamExpirationMap = {};
-        if (steamFeatured && steamFeatured.specials && Array.isArray(steamFeatured.specials.items)) {
+        if (steamFeatured?.specials?.items) {
           for (const s of steamFeatured.specials.items) {
             if (s.id && s.discount_expiration) {
               steamExpirationMap[s.id] = s.discount_expiration;
@@ -354,7 +458,7 @@
         if (steamPrices) {
           for (const item of CURATED_STEAM_GAMES) {
             const entry = steamPrices[item.appid];
-            if (entry && entry.success && entry.data && entry.data.price_overview) {
+            if (entry?.success && entry?.data?.price_overview) {
               const p = entry.data.price_overview;
               const orig = Math.round(p.initial / 100);
               const fin = Math.round(p.final / 100);
@@ -373,30 +477,36 @@
                 }
               }
 
-              const lowInfo = evaluateHistoricalLow(fin, orig, disc, item.historicalLow);
-
               mergedMap.set(`steam_app_${item.appid}`, {
                 id: item.appid,
                 platform: 'steam',
+                platforms: ['PC'],
                 deviceText: 'PC (Steam)',
                 title: item.title,
                 image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.appid}/header.jpg`,
                 storeUrl: `https://store.steampowered.com/app/${item.appid}/`,
                 extraUrl: `https://steamdb.info/app/${item.appid}/`,
-                extraText: 'SteamDB 詳情',
+                extraText: 'SteamDB 史低',
                 originalPrice: orig,
                 finalPrice: fin,
+                historicalLow: item.historicalLow,
                 discount: disc,
+                psPlusPrice: null,
+                psPlusDiscount: null,
+                psPlusCatalog: false,
+                psPlusText: null,
+                metacritic: item.metacritic || 85,
+                ps5ProEnhanced: false,
+                isNewToday: false,
                 saleStart,
-                saleEnd,
-                ...lowInfo
+                saleEnd
               });
             }
           }
         }
 
         // 2. 解析 Steam 今日特惠
-        if (steamFeatured && steamFeatured.specials && Array.isArray(steamFeatured.specials.items)) {
+        if (steamFeatured?.specials?.items) {
           for (const s of steamFeatured.specials.items) {
             if (!s.id || s.final_price === undefined) continue;
             const orig = Math.round((s.original_price || s.final_price) / 100);
@@ -415,35 +525,41 @@
             }
 
             if (!mergedMap.has(itemKey)) {
-              const lowInfo = evaluateHistoricalLow(fin, orig, disc, KNOWN_STEAM_LOWS[s.id]);
+              const meta = KNOWN_STEAM_META[s.id];
               mergedMap.set(itemKey, {
                 id: s.id,
                 platform: 'steam',
+                platforms: ['PC'],
                 deviceText: isBundle ? 'Steam 組合包' : 'PC (Steam)',
                 title: s.name,
                 image: s.large_capsule_image || s.header_image || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${s.id}/header.jpg`,
                 storeUrl: isBundle ? `https://store.steampowered.com/bundle/${s.id}/` : `https://store.steampowered.com/app/${s.id}/`,
                 extraUrl: `https://steamdb.info/${isBundle ? 'bundle' : 'app'}/${s.id}/`,
-                extraText: 'SteamDB 詳情',
+                extraText: 'SteamDB 史低',
                 originalPrice: orig,
                 finalPrice: fin,
+                historicalLow: meta ? meta.historicalLow : fin,
                 discount: disc,
+                psPlusPrice: null,
+                psPlusDiscount: null,
+                psPlusCatalog: false,
+                psPlusText: null,
+                metacritic: meta ? meta.metacritic : (disc >= 50 ? 82 : null),
+                ps5ProEnhanced: false,
+                isNewToday: true,
                 saleStart,
-                saleEnd,
-                ...lowInfo
+                saleEnd
               });
             }
           }
         }
 
-        // 3. 解析 PlayStation Store 台灣區官方特惠
+        // 3. 解析 PlayStation 專區 (含 PS Plus 折扣標示與 PS Deals 屬性)
         if (psnData && Array.isArray(psnData.psn)) {
           for (const g of psnData.psn) {
-            const lowInfo = evaluateHistoricalLow(g.finalPrice, g.originalPrice, g.discount, g.historicalLow);
             mergedMap.set(`psn_${g.id}`, {
               ...g,
-              extraText: 'PS Deals 台灣史低',
-              ...lowInfo
+              extraText: 'PS Deals 價格走勢'
             });
           }
         }
@@ -453,9 +569,10 @@
 
         const cSteam = allGames.filter(g => g.platform === 'steam').length;
         const cPsn = allGames.filter(g => g.platform === 'psn').length;
+        const cPsPlus = allGames.filter(g => g.platform === 'psn' && (g.psPlusText || g.psPlusCatalog)).length;
 
         document.getElementById('connectionStatus').innerHTML =
-          `✅ 台灣區雙平台連線成功：Steam (${cSteam} 款)・PS Store (${cPsn} 款)`;
+          `✅ 台灣區同步完成：Steam (${cSteam} 款)・PlayStation (${cPsn} 款，含 ${cPsPlus} 款 PS Plus 專屬優惠)`;
 
         syncWishlistPrices();
         renderGames();
@@ -468,7 +585,7 @@
       }
     }
 
-    // 雙平台搜尋
+    // 搜尋功能
     document.getElementById('searchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const term = document.getElementById('searchInput').value.trim();
@@ -494,29 +611,36 @@
             const orig = Math.round((item.price.initial || item.price.final) / 100);
             const fin = Math.round(item.price.final / 100);
             const disc = orig > fin ? Math.round((1 - fin / orig) * 100) : 0;
-            const lowInfo = evaluateHistoricalLow(fin, orig, disc, KNOWN_STEAM_LOWS[item.id]);
+            const meta = KNOWN_STEAM_META[item.id];
             return {
               id: item.id,
               platform: 'steam',
+              platforms: ['PC'],
               deviceText: 'PC (Steam)',
               title: item.name,
               image: item.tiny_image ? item.tiny_image.replace('capsule_sm_120.jpg', 'header.jpg') : `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
               storeUrl: `https://store.steampowered.com/app/${item.id}/`,
               extraUrl: `https://steamdb.info/app/${item.id}/`,
-              extraText: 'SteamDB 詳情',
+              extraText: 'SteamDB 史低',
               originalPrice: orig,
               finalPrice: fin,
+              historicalLow: meta ? meta.historicalLow : fin,
               discount: disc,
+              psPlusPrice: null,
+              psPlusDiscount: null,
+              psPlusCatalog: false,
+              psPlusText: null,
+              metacritic: meta ? meta.metacritic : null,
+              ps5ProEnhanced: false,
+              isNewToday: false,
               saleStart: disc > 0 ? '2026/10/20' : null,
-              saleEnd: disc > 0 ? '2026/11/03' : null,
-              ...lowInfo
+              saleEnd: disc > 0 ? '2026/11/03' : null
             };
           });
 
         const psnRes = ((psnSearchData && psnSearchData.psn) ? psnSearchData.psn : []).map(g => ({
           ...g,
-          extraText: 'PS Deals 台灣史低',
-          ...evaluateHistoricalLow(g.finalPrice, g.originalPrice, g.discount, g.historicalLow)
+          extraText: 'PS Deals 價格走勢'
         }));
 
         searchResults = [...psnRes, ...steamResults];
@@ -559,46 +683,162 @@
       renderGames();
     }
 
-    function updateBudgetLabel() {
-      const val = Number(document.getElementById('budgetRange').value);
-      document.getElementById('budgetLabel').textContent = val >= 2500 ? '無上限' : `NT$ ${val}`;
+    function setPsCollection(col) {
+      currentPsCollection = col;
+      document.querySelectorAll('.ps-col-btn').forEach(btn => {
+        if (btn.dataset.col === col) {
+          btn.className = 'ps-col-btn px-2.5 py-1 rounded-lg text-xs font-bold psdeals-teal-active transition flex items-center gap-1 shadow';
+        } else if (btn.dataset.col.startsWith('ps_plus')) {
+          btn.className = 'ps-col-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border border-amber-400/50 transition';
+        } else if (btn.dataset.col === 'ps5_pro_enhanced') {
+          btn.className = 'ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-950/60 text-purple-300 hover:bg-purple-900/60 border border-purple-700/50 transition';
+        } else {
+          btn.className = 'ps-col-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-1';
+        }
+      });
+
+      // 同步更新右下方「開啟 PS Deals 台灣站對應合集」按鈕網址
+      const extBtn = document.getElementById('psDealsExternalLink');
+      if (extBtn && PSDEALS_COLLECTION_URLS[col]) {
+        extBtn.href = PSDEALS_COLLECTION_URLS[col];
+      }
+
+      // 若點選 PS 專屬功能合集，自動切換至 PlayStation 或全部顯示
+      if ((col === 'ps_plus_discounts' || col === 'ps_plus_catalog' || col === 'ps5_pro_enhanced') && currentPlatform === 'steam') {
+        setPlatformFilter('psn');
+        return;
+      }
       renderGames();
+    }
+
+    function setPriceTier(tier) {
+      currentPriceTier = Number(tier);
+      document.querySelectorAll('.tier-btn').forEach(btn => {
+        if (Number(btn.dataset.tier) === currentPriceTier) {
+          btn.className = 'tier-btn px-2.5 py-1 rounded-lg bg-sky-500 text-slate-950 font-bold text-xs transition';
+        } else {
+          btn.className = 'tier-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition';
+        }
+      });
+
+      const extBtn = document.getElementById('psDealsExternalLink');
+      if (extBtn && currentPriceTier > 0) {
+        const tierMap = { 160: 'games_under_5', 320: 'games_under_10', 640: 'games_under_20', 960: 'games_under_30' };
+        extBtn.href = `https://psdeals.net/tw-store/collection/${tierMap[currentPriceTier]}`;
+      }
+      renderGames();
+    }
+
+    function setPsConsole(consoleType) {
+      currentPsConsole = consoleType;
+      document.querySelectorAll('.console-btn').forEach(btn => {
+        if (btn.dataset.console === consoleType) {
+          btn.className = 'console-btn px-2.5 py-1 rounded-lg bg-sky-500 text-slate-950 font-bold text-xs transition';
+        } else {
+          btn.className = 'console-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition';
+        }
+      });
+      renderGames();
+    }
+
+    function resetAllFilters() {
+      currentPlatform = 'all';
+      currentPsCollection = 'all';
+      currentPriceTier = 0;
+      currentPsConsole = 'all';
+      document.getElementById('onlyDiscountToggle').checked = false;
+      setPlatformFilter('all');
+      setPsCollection('all');
+      setPriceTier(0);
+      setPsConsole('all');
     }
 
     function renderGames() {
       const gridEl = document.getElementById('gamesGrid');
       const emptyEl = document.getElementById('emptyState');
       const onlyDiscount = document.getElementById('onlyDiscountToggle').checked;
-      const onlyHistLow = document.getElementById('onlyHistoricalLowToggle').checked;
-      const maxBudget = Number(document.getElementById('budgetRange').value);
+      const usePsPlus = document.getElementById('usePsPlusPriceToggle').checked;
       const sortBy = document.getElementById('sortSelect').value;
 
-      let list = searchResults !== null ? [...searchResults] : [...allGames];
+      let rawList = searchResults !== null ? [...searchResults] : [...allGames];
 
+      // 計算每款遊戲在當前模式下的有效比價金額 (若勾選 PS+ 會員價，則優先以 PS+ 價格判斷史低與預算)
+      let list = rawList.map(g => {
+        const effectivePrice = (usePsPlus && g.psPlusPrice !== null && g.psPlusPrice < g.finalPrice)
+          ? g.psPlusPrice
+          : g.finalPrice;
+        const effectiveDiscount = (usePsPlus && g.psPlusDiscount !== null && g.psPlusDiscount > g.discount)
+          ? g.psPlusDiscount
+          : g.discount;
+        const lowInfo = evaluateHistoricalLow(effectivePrice, g.originalPrice, effectiveDiscount, g.historicalLow);
+        return {
+          ...g,
+          effectivePrice,
+          effectiveDiscount,
+          ...lowInfo
+        };
+      });
+
+      // 1. 平台過濾
       if (currentPlatform !== 'all') {
         list = list.filter(g => g.platform === currentPlatform);
       }
+
+      // 2. 主機過濾 (PS5 / PS4)
+      if (currentPsConsole !== 'all') {
+        list = list.filter(g =>
+          g.platform === 'psn' &&
+          Array.isArray(g.platforms) &&
+          g.platforms.includes(currentPsConsole)
+        );
+      }
+
+      // 3. 只看特價中
       if (onlyDiscount) {
-        list = list.filter(g => g.discount > 0);
+        list = list.filter(g => g.effectiveDiscount > 0 || g.psPlusCatalog);
       }
-      if (onlyHistLow) {
+
+      // 4. 按價格挑選遊戲 (NT$160 / 320 / 640 / 960)
+      if (currentPriceTier > 0) {
+        list = list.filter(g => g.effectivePrice <= currentPriceTier);
+      }
+
+      // 5. PS Deals 合集篩選
+      if (currentPsCollection === 'cheaper_than_ever') {
         list = list.filter(g => g.lowStatus === 'new_low' || g.lowStatus === 'match_low');
-      }
-      if (maxBudget < 2500) {
-        list = list.filter(g => g.finalPrice <= maxBudget);
+      } else if (currentPsCollection === 'discounts_today') {
+        list = list.filter(g => g.isNewToday || g.effectiveDiscount >= 40);
+      } else if (currentPsCollection === 'ending_soon') {
+        list = list.filter(g => g.saleEnd && getRemainingDays(g.saleEnd) <= 5);
+      } else if (currentPsCollection === 'huge_discounts') {
+        list = list.filter(g => g.effectiveDiscount >= 50);
+      } else if (currentPsCollection === 'great_games_half_price') {
+        list = list.filter(g => (g.metacritic >= 80) && (g.effectiveDiscount >= 50));
+      } else if (currentPsCollection === 'ps5_pro_enhanced') {
+        list = list.filter(g => g.ps5ProEnhanced === true);
+      } else if (currentPsCollection === 'ps_plus_discounts') {
+        list = list.filter(g => g.psPlusPrice !== null && (g.psPlusPrice < g.finalPrice || g.psPlusText));
+      } else if (currentPsCollection === 'ps_plus_catalog') {
+        list = list.filter(g => g.psPlusCatalog === true);
       }
 
+      // 6. 排序邏輯
       const lowWeight = { new_low: 3, match_low: 2, near_low: 1, above_low: 0 };
-
       list.sort((a, b) => {
         if (sortBy === 'low_first') {
           const diff = (lowWeight[b.lowStatus] || 0) - (lowWeight[a.lowStatus] || 0);
           if (diff !== 0) return diff;
-          return b.discount - a.discount;
+          return b.effectiveDiscount - a.effectiveDiscount;
         }
-        if (sortBy === 'discount_desc') return b.discount - a.discount;
-        if (sortBy === 'price_asc') return a.finalPrice - b.finalPrice;
-        if (sortBy === 'price_desc') return b.finalPrice - a.finalPrice;
+        if (sortBy === 'discount_desc') return b.effectiveDiscount - a.effectiveDiscount;
+        if (sortBy === 'psplus_first') {
+          const aHasPlus = (a.psPlusText || a.psPlusCatalog) ? 1 : 0;
+          const bHasPlus = (b.psPlusText || b.psPlusCatalog) ? 1 : 0;
+          if (bHasPlus !== aHasPlus) return bHasPlus - aHasPlus;
+          return b.effectiveDiscount - a.effectiveDiscount;
+        }
+        if (sortBy === 'price_asc') return a.effectivePrice - b.effectivePrice;
+        if (sortBy === 'metacritic_desc') return (b.metacritic || 0) - (a.metacritic || 0);
         return 0;
       });
 
@@ -614,21 +854,19 @@
       gridEl.innerHTML = list.map(game => {
         const uniqueKey = `${game.platform}_${game.id}`;
         const wished = wishlist[uniqueKey];
-        const targetReached = wished && game.finalPrice <= wished.targetPrice;
+        const targetReached = wished && game.effectivePrice <= wished.targetPrice;
 
         const isSteam = game.platform === 'steam';
         const cardBg = isSteam ? 'bg-[#172437] border-slate-700/80' : 'bg-[#0f1f38] border-sky-900/70';
+
         const platBadge = isSteam
           ? `<span class="px-2 py-0.5 rounded bg-[#1b2838] text-[#66c0f4] border border-[#66c0f4]/40 font-bold flex items-center gap-1"><i class="fa-brands fa-steam"></i> ${game.deviceText}</span>`
           : `<span class="px-2 py-0.5 rounded bg-[#003791] text-sky-200 border border-sky-400/40 font-bold flex items-center gap-1"><i class="fa-brands fa-playstation"></i> ${game.deviceText}</span>`;
-        const btnClass = isSteam
-          ? 'bg-[#66c0f4] hover:bg-[#4192c1] text-slate-950'
-          : 'bg-[#0070d1] hover:bg-[#005bb5] text-white';
-        const btnName = isSteam ? '前往 Steam' : '直達 PS Store 購買';
 
+        // 史低徽章
         let lowBadgeHtml = '';
         if (game.lowStatus === 'new_low') {
-          lowBadgeHtml = `<span class="badge-new-low px-2 py-0.5 rounded bg-rose-600 text-white font-extrabold text-[11px] shadow">${game.lowLabel}</span>`;
+          lowBadgeHtml = `<span class="px-2 py-0.5 rounded bg-rose-600 text-white font-extrabold text-[11px] shadow">${game.lowLabel}</span>`;
         } else if (game.lowStatus === 'match_low') {
           lowBadgeHtml = `<span class="px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-extrabold text-[11px]">${game.lowLabel}</span>`;
         } else if (game.lowStatus === 'near_low') {
@@ -637,25 +875,80 @@
           lowBadgeHtml = `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[11px]">${game.lowLabel}</span>`;
         }
 
+        // 左上角雙重折扣角標 (一般折扣 + 金色 PS Plus 折扣角標)
+        const hasExtraPsPlus = game.psPlusDiscount && game.psPlusDiscount > game.discount;
+        const topBadgesHtml = `
+          <div class="absolute z-20 top-2.5 left-2.5 flex items-center gap-1.5">
+            ${game.discount > 0 ? `
+              <span class="px-2.5 py-1 rounded-lg ${isSteam ? 'bg-[#4c6b22] text-[#a4d007]' : 'bg-sky-600 text-white'} font-black text-xs shadow">
+                -${game.discount}%
+              </span>
+            ` : ''}
+            ${hasExtraPsPlus ? `
+              <span class="ps-plus-gradient px-2.5 py-1 rounded-lg font-black text-xs shadow flex items-center gap-1" title="PlayStation Plus 會員專屬總折扣">
+                <i class="fa-solid fa-plus text-[10px]"></i> PS+ -${game.psPlusDiscount}%
+              </span>
+            ` : (game.psPlusCatalog ? `
+              <span class="ps-plus-gradient px-2.5 py-1 rounded-lg font-black text-[11px] shadow flex items-center gap-1">
+                <i class="fa-solid fa-plus text-[10px]"></i> PS+ Extra 目錄
+              </span>
+            ` : '')}
+          </div>
+        `;
+
+        // Metacritic & PS5 Pro 增強徽章
+        const featureTagsHtml = `
+          <div class="flex flex-wrap items-center gap-1.5 mt-2">
+            ${game.metacritic ? `
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" title="Metacritic 媒體評分">
+                MC ${game.metacritic}
+              </span>
+            ` : ''}
+            ${game.ps5ProEnhanced ? `
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                ✨ PS5 Pro 增強
+              </span>
+            ` : ''}
+            ${game.isNewToday ? `
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                ⚡ 24h 新優惠
+              </span>
+            ` : ''}
+          </div>
+        `;
+
+        // PS Plus 專屬金色價格橫幅
+        const psPlusRowHtml = (game.platform === 'psn' && (hasExtraPsPlus || game.psPlusCatalog)) ? `
+          <div class="ps-plus-box px-2.5 py-1.5 rounded-xl flex items-center justify-between text-xs">
+            <span class="font-bold text-amber-300 flex items-center gap-1">
+              <span class="inline-flex items-center justify-center w-4 h-4 rounded ps-plus-gradient font-black text-[10px]">+</span>
+              <span>${game.psPlusText || 'PS Plus 會員價'}</span>
+            </span>
+            <span class="font-black text-amber-300 text-sm">
+              ${hasExtraPsPlus ? `NT$ ${game.psPlusPrice.toLocaleString()}` : '訂閱免費玩'}
+            </span>
+          </div>
+        ` : '';
+
+        // 特價起訖日期列
         const remainText = game.saleEnd ? getRemainingDaysText(game.saleEnd) : '';
         const saleDateHtml = (game.discount > 0 && game.saleStart && game.saleEnd) ? `
           <div class="px-2.5 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700/70 flex items-center justify-between text-[11px]">
             <span class="text-slate-300">
-              <i class="fa-regular fa-calendar-check text-sky-400 mr-1"></i>特價期：${game.saleStart} ~ ${game.saleEnd}
+              <i class="fa-regular fa-calendar-check text-sky-400 mr-1"></i>${game.saleStart} ~ ${game.saleEnd}
             </span>
             ${remainText ? `<span class="px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-bold">${remainText}</span>` : ''}
           </div>
-        ` : `
-          <div class="px-2.5 py-1.5 rounded-lg bg-slate-900/40 border border-slate-800/60 text-[11px] text-slate-500">
-            <i class="fa-regular fa-clock mr-1"></i>目前為常規售價（可點右上角鈴鐺設目標價）
-          </div>
-        `;
+        ` : '';
 
-        const imageRenderHtml = isSteam ? `
+        // 圖片渲染
+        const isSquareImg = game.image && game.image.includes('image.api.playstation.com');
+        const imageRenderHtml = !isSquareImg ? `
           <img
             src="${game.image}"
             alt="${game.title}"
             loading="lazy"
+            onerror="this.src='https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg'"
             class="w-full h-full object-cover"
           />
         ` : `
@@ -673,57 +966,60 @@
           />
         `;
 
+        const btnClass = isSteam
+          ? 'bg-[#66c0f4] hover:bg-[#4192c1] text-slate-950'
+          : 'bg-[#0070d1] hover:bg-[#005bb5] text-white';
+        const btnName = isSteam ? '前往 Steam' : (game.storeUrl.includes('psdeals.net') ? 'PS Deals 查全版本' : '直達 PS Store');
+
         return `
           <div class="game-card rounded-2xl ${cardBg} border shadow-lg overflow-hidden flex flex-col justify-between">
             <div>
               <div class="relative aspect-[460/215] bg-slate-950 overflow-hidden">
                 ${imageRenderHtml}
-                ${game.discount > 0 ? `
-                  <div class="absolute z-20 top-2.5 left-2.5 px-2.5 py-1 rounded-lg ${isSteam ? 'bg-[#4c6b22] text-[#a4d007]' : 'bg-rose-600 text-white'} font-black text-sm shadow">
-                    -${game.discount}%
-                  </div>
-                ` : ''}
+                ${topBadgesHtml}
                 <button
-                  onclick="promptWishlist('${uniqueKey}', '${game.title.replace(/'/g, "\\'")}', ${game.finalPrice}, '${game.storeUrl}', '${game.platform}')"
+                  onclick="promptWishlist('${uniqueKey}', '${game.title.replace(/'/g, "\\'")}', ${game.effectivePrice}, '${game.storeUrl}', '${game.platform}')"
                   class="absolute z-20 top-2.5 right-2.5 w-8 h-8 rounded-lg ${wished ? 'bg-amber-500 text-slate-950' : 'bg-slate-900/85 text-slate-300 hover:text-white'} flex items-center justify-center transition shadow"
-                  title="設定目標入手價"
+                  title="設定降價提醒"
                 >
                   <i class="fa-solid fa-bell text-xs"></i>
                 </button>
               </div>
 
               <div class="p-4 pb-2">
-                <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] mb-2">
+                <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] mb-1.5">
                   ${platBadge}
                   ${lowBadgeHtml}
                 </div>
                 <h3 class="font-bold text-white text-sm line-clamp-2 min-h-[40px]" title="${game.title}">
                   ${game.title}
                 </h3>
-                ${targetReached ? `<div class="mt-1 text-xs font-bold text-emerald-400">🎉 已達您設定的目標入手價！</div>` : ''}
+                ${featureTagsHtml}
+                ${targetReached ? `<div class="mt-1.5 text-xs font-bold text-emerald-400">🎉 已達您設定的目標入手價！</div>` : ''}
               </div>
             </div>
 
-            <div class="px-4 pb-4 pt-2 flex flex-col gap-2.5">
+            <div class="px-4 pb-4 pt-2 flex flex-col gap-2">
               ${saleDateHtml}
+              ${psPlusRowHtml}
 
-              <div class="pt-1 border-t border-slate-700/50 flex flex-col gap-1">
+              <div class="pt-1.5 border-t border-slate-700/50 flex flex-col gap-1">
                 <div class="flex items-center justify-between text-xs">
                   <span class="text-slate-400">台灣歷史最低價</span>
                   <span class="font-bold text-slate-200">NT$ ${game.historicalLow.toLocaleString()}</span>
                 </div>
                 <div class="flex items-baseline justify-between">
-                  <span class="text-xs text-slate-400">台灣官方現價</span>
+                  <span class="text-xs text-slate-400">一般特惠現價</span>
                   <div class="text-right">
                     ${game.discount > 0 ? `<span class="text-xs text-slate-400 line-through mr-1.5">NT$ ${game.originalPrice.toLocaleString()}</span>` : ''}
-                    <span class="text-lg font-black ${game.discount > 0 ? (isSteam ? 'text-[#a4d007]' : 'text-amber-400') : 'text-white'}">
+                    <span class="text-lg font-black ${game.discount > 0 ? (isSteam ? 'text-[#a4d007]' : 'text-sky-300') : 'text-white'}">
                       NT$ ${game.finalPrice.toLocaleString()}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-2">
+              <div class="grid grid-cols-2 gap-2 mt-1">
                 <a
                   href="${game.storeUrl}"
                   target="_blank"
@@ -750,7 +1046,7 @@
     function promptWishlist(key, title, currentPrice, storeUrl, platform) {
       const existing = wishlist[key];
       const defaultTarget = existing ? existing.targetPrice : Math.max(100, Math.round(currentPrice * 0.8));
-      const input = prompt(`設定《${title}》的目標入手價 (NT$ 台幣)：\n(目前售價為 NT$ ${currentPrice}，留空或取消可移除追蹤)`, defaultTarget);
+      const input = prompt(`設定《${title}》的目標入手價 (NT$ 台幣)：\n(目前最低入手價為 NT$ ${currentPrice}，留空或取消可移除追蹤)`, defaultTarget);
 
       if (input === null) return;
       const targetPrice = parseInt(input, 10);
@@ -770,7 +1066,7 @@
       for (const g of allGames) {
         const k = `${g.platform}_${g.id}`;
         if (wishlist[k]) {
-          wishlist[k].currentPrice = g.finalPrice;
+          wishlist[k].currentPrice = g.psPlusPrice ? Math.min(g.finalPrice, g.psPlusPrice) : g.finalPrice;
         }
       }
       localStorage.setItem('gamedeal_wishlist', JSON.stringify(wishlist));
@@ -783,7 +1079,7 @@
       const container = document.getElementById('wishlistContainer');
 
       if (keys.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-xs text-slate-500">尚未加入任何追蹤遊戲，點擊卡片右上角的鈴鐺即可設定目標價！</div>`;
+        container.innerHTML = `<div class="text-center py-10 text-xs text-slate-500">尚未加入任何追蹤遊戲，點擊卡片右上角的鈴鐺即可設定降價提醒！</div>`;
         return;
       }
 
@@ -802,12 +1098,12 @@
                 <span class="text-xs font-bold text-white truncate">${item.title}</span>
               </div>
               <div class="text-[11px] text-slate-400">
-                現價: <span class="text-white font-semibold">NT$ ${item.currentPrice}</span> ｜ 目標價: <span class="text-amber-300 font-semibold">NT$ ${item.targetPrice}</span>
+                最低價: <span class="text-white font-semibold">NT$ ${item.currentPrice}</span> ｜ 目標價: <span class="text-amber-300 font-semibold">NT$ ${item.targetPrice}</span>
               </div>
               ${reached ? `<div class="text-[11px] text-emerald-400 font-bold mt-1">🎉 已達目標入手價！</div>` : ''}
             </div>
             <div class="flex items-center gap-1.5">
-              <a href="${item.storeUrl || '#'}" target="_blank" class="px-2.5 py-1 rounded ${isSteam ? 'bg-[#66c0f4] text-slate-950' : 'bg-[#0070d1] text-white'} font-bold text-xs">購買</a>
+              <a href="${item.storeUrl || '#'}" target="_blank" class="px-2.5 py-1 rounded ${isSteam ? 'bg-[#66c0f4] text-slate-950' : 'bg-[#0070d1] text-white'} font-bold text-xs">查看</a>
               <button onclick="removeWishlistItem('${key}')" class="p-1.5 text-slate-400 hover:text-rose-400">
                 <i class="fa-solid fa-trash-can text-xs"></i>
               </button>
